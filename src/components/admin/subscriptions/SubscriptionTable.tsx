@@ -9,18 +9,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Undo, AlertTriangle } from "lucide-react";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Loader2, Undo } from "lucide-react";
 import { Subscription } from '@/services/subscriptionService';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
@@ -162,30 +153,22 @@ const SubscriptionTable = ({
                 </Table>
             </div>
 
-            <AlertDialog open={!!subscriptionToCancel} onOpenChange={(open) => !open && setSubscriptionToCancel(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                            <AlertTriangle className="w-5 h-5" />
-                            Confirm Cancellation
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to cancel the subscription for <strong>{subscriptionToCancel?.user?.name}</strong>?
-                            <br /><br />
-                            This action will stop the auto-renewal and the user might lose access after the current period ends.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={confirmCancel}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            Yes, Cancel It
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmDialog
+                isOpen={!!subscriptionToCancel}
+                onClose={() => setSubscriptionToCancel(null)}
+                onConfirm={confirmCancel}
+                title="Confirm Cancellation"
+                description={
+                    <>
+                        Are you sure you want to cancel the subscription for <strong>{subscriptionToCancel?.user?.name}</strong>?
+                        <br /><br />
+                        This action will stop the auto-renewal and the user might lose access after the current period ends.
+                    </>
+                }
+                confirmText="Yes, Cancel It"
+                cancelText="Keep Subscription"
+                variant="destructive"
+            />
         </>
     );
 };
