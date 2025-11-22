@@ -9,7 +9,7 @@ import { authService } from '@/services/authService';
 import { Shield, Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { User } from '@/types/auth';
+import { User } from '@/types/auth/auth';
 
 export default function AdminLogin() {
     const [email, setEmail] = useState('');

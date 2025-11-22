@@ -144,6 +144,38 @@ export const newsService = {
     },
 
     /**
+     * Generate AI news
+     * @param params generation params
+     * @returns generated articles
+     */
+    async generateAiNews(params: {
+        category: string;
+        count: number;
+        language: string;
+        tone: string;
+        length: string;
+        prompt?: string;
+    }): Promise<any[]> {
+        const response = await fetch(`${API_BASE_URL}/news/ai-generate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to generate news');
+        }
+
+        const data = await response.json();
+        return data.data;
+    },
+
+    /**
      * Delete a news by ID
      * @param id news ID
      * @returns void
