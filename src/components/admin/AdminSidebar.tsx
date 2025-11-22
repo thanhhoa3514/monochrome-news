@@ -5,14 +5,15 @@ import {
     Users,
     Settings,
     Shield,
-    CreditCard
+    CreditCard,
+    Sparkles
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 interface AdminSidebarProps {
-    selectedTab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings';
-    setSelectedTab: (tab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings') => void;
+    selectedTab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles';
+    setSelectedTab: (tab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles') => void;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ selectedTab, setSelectedTab }) => {
@@ -60,6 +61,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ selectedTab, setSelectedTab
                         >
                             <Shield size={18} />
                             Permissions
+                        </Button>
+                        <Button
+                            variant={selectedTab === 'ai-articles' ? 'default' : 'ghost'}
+                            className="justify-start gap-2 rounded-none"
+                            onClick={() => setSelectedTab('ai-articles')}
+                        >
+                            <Sparkles size={18} />
+                            AI Articles
                         </Button>
                         <Button
                             variant={selectedTab === 'settings' ? 'default' : 'ghost'}
