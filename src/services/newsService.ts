@@ -1,8 +1,19 @@
 import { News, Category, PaginatedResponse, NewsQueryParams } from '@/types/news';
+import { API_URL } from '@/config/environment';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+// Extend NewsQueryParams to include status
+interface AdminNewsQueryParams extends NewsQueryParams {
+    status?: string;
+}
+
+const API_BASE_URL = `${API_URL}/api/v1`;
 
 export const newsService = {
+    /**
+     * Get news
+     * @param params news query params
+     * @returns paginated news
+     */
     async getNews(params: NewsQueryParams = {}): Promise<PaginatedResponse<News>> {
         const queryParams = new URLSearchParams();
 
@@ -32,6 +43,10 @@ export const newsService = {
         return response.json();
     },
 
+    /**
+     * Get categories
+     * @returns categories
+     */
     async getCategories(): Promise<Category[]> {
         const response = await fetch(`${API_BASE_URL}/categories`, {
             headers: {
@@ -46,6 +61,11 @@ export const newsService = {
         return response.json();
     },
 
+    /**
+     * Get news by ID
+     * @param id news ID
+     * @returns news by ID
+     */
     async getNewsById(id: number | string): Promise<News> {
         const response = await fetch(`${API_BASE_URL}/news/${id}`, {
             headers: {
@@ -63,6 +83,12 @@ export const newsService = {
         return response.json();
     },
 
+    /**
+     * Get news by category slug
+     * @param slug category slug
+     * @param page page number
+     * @returns news by category slug
+     */
     async getNewsByCategorySlug(slug: string, page: number = 1): Promise<PaginatedResponse<News>> {
         const response = await fetch(`${API_BASE_URL}/categories/${slug}/news?page=${page}`, {
             headers: {
@@ -77,21 +103,63 @@ export const newsService = {
         return response.json();
     },
 
+    /**
+     * Get featured news
+     * @returns featured news
+     */
     async getFeaturedNews(): Promise<News[]> {
         // Fetch latest 5 news for carousel/featured section
         const response = await this.getNews({ per_page: 5 });
         return response.data;
     },
 
+    /**
+     * Get latest news
+     * @returns latest news
+     */
     async getLatestNews(): Promise<News[]> {
         const response = await this.getNews({ per_page: 6 });
         return response.data;
     },
 
+    /**
+     * Get popular news
+     * @returns 
+     */
     async getPopularNews(): Promise<News[]> {
         // Ideally backend should support sorting by views
         // For now, just fetching some news
         const response = await this.getNews({ per_page: 4 });
         return response.data;
+    },
+
+    /**
+     * Get news for admin
+     * @param params 
+     * @returns 
+     */
+    async getAdminNews(params: AdminNewsQueryParams = {}): Promise<PaginatedResponse<News>> {
+        const response = await this.getNews(params);
+        return response;
+    },
+
+    /**
+     * Delete a news by ID
+     * @param id news ID
+     * @returns void
+     */
+    async deleteNews(id: number): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                'Accept': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete news');
+        }
     }
 };
