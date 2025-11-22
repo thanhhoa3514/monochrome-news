@@ -22,10 +22,10 @@ interface AddEditArticleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (article: Partial<Article>) => void;
-  article?: Article;
+  initialData?: Article;
 }
 
-const AddEditArticleModal = ({ isOpen, onClose, onSubmit, article }: AddEditArticleModalProps) => {
+const AddEditArticleModal = ({ isOpen, onClose, onSubmit, initialData }: AddEditArticleModalProps) => {
   const initialFormState = {
     title: "",
     content: "",
@@ -41,19 +41,19 @@ const AddEditArticleModal = ({ isOpen, onClose, onSubmit, article }: AddEditArti
   const categories = Array.from(new Set(mockNewsData.map(news => news.category)));
 
   useEffect(() => {
-    if (article) {
+    if (initialData) {
       setFormData({
-        title: article.title,
-        content: article.content,
-        summary: article.summary,
-        category: article.category,
-        author: article.author,
-        image: article.image,
+        title: initialData.title,
+        content: initialData.content,
+        summary: initialData.summary,
+        category: initialData.category,
+        author: initialData.author,
+        image: initialData.image,
       });
     } else {
       setFormData(initialFormState);
     }
-  }, [article, isOpen]);
+  }, [initialData, isOpen]);
 
   const handleChange = (field: keyof Article, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -64,7 +64,7 @@ const AddEditArticleModal = ({ isOpen, onClose, onSubmit, article }: AddEditArti
     onClose();
   };
 
-  const isEditing = !!article;
+  const isEditing = !!initialData;
 
   return (
     <FormModal
