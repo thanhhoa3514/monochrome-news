@@ -1,4 +1,4 @@
-import { LoginCredentials, RegisterData, AuthResponse, VerifyOtpData } from '@/types/auth';
+import { LoginCredentials, RegisterData, AuthResponse, VerifyOtpData } from '@/types/auth/auth';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
