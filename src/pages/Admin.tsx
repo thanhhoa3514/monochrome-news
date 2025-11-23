@@ -8,11 +8,12 @@ import AdminSubscriptions from '@/components/admin/AdminSubscriptions';
 import AdminPermissions from '@/components/admin/AdminPermissions';
 import AdminAIArticles from '@/components/admin/AdminAIArticles';
 import AdminSettings from '@/components/admin/AdminSettings';
+import AdminTags from '@/components/admin/AdminTags';
 
 
 import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
 import { useToast } from '@/hooks/use-toast';
-type TabType = 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles';
+type TabType = 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags';
 
 
 
@@ -45,17 +46,18 @@ const Admin = () => {
             {selectedTab === 'subscriptions' && <AdminSubscriptions />}
             {selectedTab === 'permissions' && <AdminPermissions />}
             {selectedTab === 'ai-articles' && <AdminAIArticles />}
+            {selectedTab === 'tags' && <AdminTags />}
             {selectedTab === 'settings' && <AdminSettings />}
           </main>
         </div>
       </div>
 
       {/* Modals */}
-      <AddEditArticleModal
+      {/* <AddEditArticleModal
         isOpen={isAddArticleModalOpen}
         onClose={() => setIsAddArticleModalOpen(false)}
         onSubmit={handleAddArticle}
-      />
+      /> */}
     </div>
   );
 }
