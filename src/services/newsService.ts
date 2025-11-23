@@ -16,6 +16,7 @@ export const newsService = {
         if (params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params.category_id) queryParams.append('category_id', params.category_id.toString());
         if (params.is_premium !== undefined) queryParams.append('is_premium', params.is_premium.toString());
+        if (params.tag_id) queryParams.append('tag_id', params.tag_id.toString());
 
         let endpoint = '/news';
 
@@ -188,18 +189,22 @@ export const newsService = {
     },
     /**
      * Create a news
-     * @param news news data
+     * @param news news data (CreateNewsInput or FormData for file uploads)
      * @returns created news
      */
-    async createNews(news: CreateNewsInput): Promise<News> {
+    async createNews(news: CreateNewsInput | FormData): Promise<News> {
+        const isFormData = news instanceof FormData;
+
         const response = await fetch(`${API_BASE_URL}/news`, {
             method: 'POST',
-            headers: {
+            headers: isFormData ? {
+                'Accept': 'application/json',
+            } : {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify(news)
+            body: isFormData ? news : JSON.stringify(news),
         });
 
         if (!response.ok) {

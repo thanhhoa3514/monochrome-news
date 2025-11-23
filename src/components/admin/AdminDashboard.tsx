@@ -1,20 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockNewsData } from '@/data/mockNewsData';
-import { mockUserData } from '@/data/mockUserData';
-import { mockSubscriptionData } from '@/data/mockSubscriptionData';
+import { newsService } from '@/services/newsService';
+import { userService } from '@/services/userService';
+import { Loader2 } from 'lucide-react';
 
 const AdminDashboard = () => {
-    const stats = {
-        articles: mockNewsData.length,
-        categories: [...new Set(mockNewsData.map(item => item.category))].length,
-        users: mockUserData.length,
-        views: 12580, // Mock data
-        activeSubscriptions: mockSubscriptionData.filter(s => s.status === 'active').length,
-        totalRevenue: mockSubscriptionData
-            .filter(s => s.status === 'active')
-            .reduce((sum, s) => sum + s.amount, 0)
-    };
+    const [stats, setStats] = useState({
+        articles: 0,
+        categories: 0,
+        users: 0,
+        views: 0,
+        activeSubscriptions: 0,
+        totalRevenue: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [newsData, categoriesData, usersData] = await Promise.all([
+                    newsService.getNews({ per_page: 1 }),
+                    newsService.getCategories(),
+                    userService.getUsers(1, 1)
+                ]);
+
+                // For views, we might need a separate endpoint or sum up from newsData if we fetched all.
+                // For now, we'll leave it as 0 or a placeholder until backend supports it.
+                // Same for subscriptions and revenue.
+
+                setStats({
+                    articles: newsData.total,
+                    categories: categoriesData.length,
+                    users: usersData.total,
+                    views: 0, // Placeholder
+                    activeSubscriptions: 0, // Placeholder
+                    totalRevenue: 0 // Placeholder
+                });
+            } catch (error) {
+                console.error('Failed to fetch dashboard stats:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    if (loading) {
+        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+    }
 
     return (
         <div className="space-y-6">

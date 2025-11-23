@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -9,9 +9,11 @@ import {
   CommandItem,
   CommandList
 } from "@/components/ui/command";
-import { Search } from 'lucide-react';
-import { mockNewsData } from '@/data/mockNewsData';
+import { Search, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
+import { newsService } from '@/services/newsService';
+import { News } from '@/types/news';
+import { useDebounce } from '@/hooks/use-debounce';
 
 type SearchCommandProps = {
   open: boolean;
@@ -22,16 +24,31 @@ export default function SearchCommand({ open, onOpenChange }: SearchCommandProps
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Filter news data based on search query
-  const filteredResults = searchQuery.length > 1
-    ? mockNewsData.filter(article => 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
-  
+  const debouncedQuery = useDebounce(searchQuery, 300);
+  const [results, setResults] = useState<News[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const searchNews = async () => {
+      if (debouncedQuery.length < 2) {
+        setResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await newsService.getNews({ q: debouncedQuery, per_page: 5 });
+        setResults(response.data);
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    searchNews();
+  }, [debouncedQuery]);
+
   const handleSelect = (articleId: number) => {
     navigate(`/news/${articleId}`);
     onOpenChange(false);
@@ -39,16 +56,25 @@ export default function SearchCommand({ open, onOpenChange }: SearchCommandProps
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput 
-        placeholder={t('search.placeholder')} 
+      <CommandInput
+        placeholder={t('search.placeholder')}
         value={searchQuery}
         onValueChange={setSearchQuery}
       />
       <CommandList>
-        <CommandEmpty>{t('search.no.results')}</CommandEmpty>
-        {filteredResults.length > 0 && (
+        <CommandEmpty>
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Searching...
+            </div>
+          ) : (
+            t('search.no.results')
+          )}
+        </CommandEmpty>
+        {!loading && results.length > 0 && (
           <CommandGroup heading={t('search.results')}>
-            {filteredResults.slice(0, 5).map((article) => (
+            {results.map((article) => (
               <CommandItem
                 key={article.id}
                 onSelect={() => handleSelect(article.id)}
@@ -57,20 +83,20 @@ export default function SearchCommand({ open, onOpenChange }: SearchCommandProps
                 <Search className="mr-2 h-4 w-4" />
                 <div>
                   <p className="font-medium">{article.title}</p>
-                  <p className="text-sm text-muted-foreground">{article.category} • {article.date}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {article.category?.name} • {article.published_at ? new Date(article.published_at).toLocaleDateString() : ''}
+                  </p>
                 </div>
               </CommandItem>
             ))}
-            {filteredResults.length > 5 && (
-              <CommandItem
-                onSelect={() => {
-                  navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-                  onOpenChange(false);
-                }}
-              >
-                {t('search.view.all', { count: filteredResults.length })}
-              </CommandItem>
-            )}
+            <CommandItem
+              onSelect={() => {
+                navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                onOpenChange(false);
+              }}
+            >
+              {t('search.view.all', { count: results.length })}
+            </CommandItem>
           </CommandGroup>
         )}
       </CommandList>

@@ -61,6 +61,7 @@ export interface NewsQueryParams {
     category_id?: number;
     is_premium?: boolean;
     q?: string; // search query
+    tag_id?: number; // filter by tag
 }
 
 export interface CreateNewsInput {
