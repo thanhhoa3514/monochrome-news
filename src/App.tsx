@@ -20,7 +20,6 @@ import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import Editor from "./pages/Editor";
 import Contact from "./pages/Contact";
-import ModalDemo from "./components/ModalDemo";
 import SocialLogin from "./pages/SocialLogin";
 import Profile from "./pages/Profile";
 
@@ -49,7 +48,6 @@ const App = () => (
               <Route path="/editor" element={<Editor />} />
               <Route path="/search" element={<Search />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/modal-demo" element={<ModalDemo />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/checkout/:planId" element={<CheckoutPage />} />
               <Route path="*" element={<NotFound />} />
