@@ -154,33 +154,44 @@ const AdminAIArticles = () => {
             return;
         }
 
+        if (!currentGenerationId) {
+            toast({ title: "Error", description: "No generation ID found.", variant: "destructive" });
+            return;
+        }
+
         try {
-            // 1. Create News
-            await newsService.createNews({
-                title: article.title,
-                slug: article.title.toLowerCase().replace(/ /g, '-') + '-' + Date.now(),
-                content: article.content,
-                category_id: Number(aiCategoryId),
-                user_id: user.id,
-                is_premium: false,
-                published_at: new Date().toISOString()
+            // Call new publish-ai endpoint that handles image persistence
+            const response = await fetch('http://localhost:8000/api/v1/news/publish-ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    generation_id: currentGenerationId,
+                    article: {
+                        title: article.title,
+                        content: article.content,
+                        category_id: Number(aiCategoryId),
+                        user_id: user.id,
+                        thumbnail: article.image || null, // LoremFlickr URL will be converted to Cloudinary
+                        is_premium: false,
+                    }
+                })
             });
 
-            // 2. Mark as Saved if we have a generation ID
-            if (currentGenerationId) {
-                await fetch(`http://localhost:8000/api/v1/ai-generations/${currentGenerationId}/save`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                    credentials: 'include'
-                });
-                fetchHistory(); // Refresh status in history
+            if (!response.ok) {
+                throw new Error('Failed to publish article');
             }
+
+            const result = await response.json();
+
+            fetchHistory(); // Refresh history
 
             toast({
                 title: "Article Published",
-                description: `"${article.title}" has been saved to the database.`,
+                description: `"${article.title}" has been saved with permanent image.`,
             });
         } catch (error) {
             console.error('Publish failed:', error);

@@ -29,6 +29,8 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData }: AddEdi
   const { user } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     title: "",
     content: "",
@@ -83,6 +85,19 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData }: AddEdi
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleFileChange = (file: File | null) => {
+    setThumbnailFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setThumbnailPreview("");
+    }
+  };
+
   const generateSlug = (title: string): string => {
     return title
       .toLowerCase()
@@ -113,34 +128,37 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData }: AddEdi
 
     setIsLoading(true);
     try {
-      const newsInput: CreateNewsInput = {
-        title: formData.title,
-        slug: initialData?.slug || generateSlug(formData.title) + '-' + Date.now(),
-        content: formData.content,
-        category_id: Number(formData.category_id),
-        user_id: user.id,
-        is_premium: formData.is_premium,
-        published_at: new Date().toISOString(),
-        thumbnail: formData.thumbnail || undefined,
-      };
-
       if (initialData) {
         // Update existing news
-        // Note: You'll need to add updateNews method to newsService
         toast({
           title: "Info",
           description: "Update functionality coming soon",
         });
       } else {
-        // Create new news
-        await newsService.createNews(newsInput);
+        // Create new news with FormData
+        const formDataToSend = new FormData();
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('slug', generateSlug(formData.title) + '-' + Date.now());
+        formDataToSend.append('content', formData.content);
+        formDataToSend.append('category_id', formData.category_id);
+        formDataToSend.append('user_id', user.id.toString());
+        formDataToSend.append('is_premium', formData.is_premium ? '1' : '0');
+        formDataToSend.append('published_at', new Date().toISOString());
+
+        if (thumbnailFile) {
+          formDataToSend.append('thumbnail', thumbnailFile);
+        }
+
+        await newsService.createNews(formDataToSend);
         toast({
           title: "Success",
           description: "Article created successfully",
         });
       }
 
-      onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      }
       onClose();
     } catch (error) {
       console.error('Failed to save article:', error);
@@ -210,13 +228,25 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData }: AddEdi
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="thumbnail">Thumbnail URL</Label>
+          <Label htmlFor="thumbnailFile">Thumbnail Image</Label>
           <Input
-            id="thumbnail"
-            value={formData.thumbnail}
-            onChange={(e) => handleChange("thumbnail", e.target.value)}
-            placeholder="Enter image URL"
+            id="thumbnailFile"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
           />
+          {thumbnailPreview && (
+            <div className="mt-2">
+              <img
+                src={thumbnailPreview}
+                alt="Thumbnail preview"
+                className="h-32 w-auto object-cover rounded border"
+              />
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Upload an image file (max 5MB) or leave empty to use AI-generated thumbnail
+          </p>
         </div>
 
         <div className="flex items-center space-x-2">

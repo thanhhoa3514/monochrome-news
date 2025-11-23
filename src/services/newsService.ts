@@ -188,18 +188,22 @@ export const newsService = {
     },
     /**
      * Create a news
-     * @param news news data
+     * @param news news data (CreateNewsInput or FormData for file uploads)
      * @returns created news
      */
-    async createNews(news: CreateNewsInput): Promise<News> {
+    async createNews(news: CreateNewsInput | FormData): Promise<News> {
+        const isFormData = news instanceof FormData;
+
         const response = await fetch(`${API_BASE_URL}/news`, {
             method: 'POST',
-            headers: {
+            headers: isFormData ? {
+                'Accept': 'application/json',
+            } : {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify(news)
+            body: isFormData ? news : JSON.stringify(news),
         });
 
         if (!response.ok) {
