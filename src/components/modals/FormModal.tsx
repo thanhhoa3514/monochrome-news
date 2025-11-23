@@ -9,8 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
-interface FormModalProps {
+type FormModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -18,6 +19,7 @@ interface FormModalProps {
   description?: string;
   submitText?: string;
   cancelText?: string;
+  isLoading?: boolean;
   children: React.ReactNode;
 }
 
@@ -29,6 +31,7 @@ const FormModal = ({
   description,
   submitText = "Save",
   cancelText = "Cancel",
+  isLoading = false,
   children,
 }: FormModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,10 +49,13 @@ const FormModal = ({
           </DialogHeader>
           <div className="py-4">{children}</div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               {cancelText}
             </Button>
-            <Button type="submit">{submitText}</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {submitText}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

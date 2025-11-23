@@ -62,3 +62,18 @@ export interface NewsQueryParams {
     is_premium?: boolean;
     q?: string; // search query
 }
+
+export interface CreateNewsInput {
+    title: string;
+    slug: string;
+    content: string;
+    category_id: number;
+    user_id: number;
+    is_premium: boolean;
+    published_at: string;
+    thumbnail?: string;
+    summary?: string; // Optional, if backend supports it
+}
+export interface AdminNewsQueryParams extends NewsQueryParams {
+    status?: string;
+}
