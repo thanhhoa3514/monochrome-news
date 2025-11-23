@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Loader2, FileText, Filter, Calendar, User as UserIcon, ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,13 +11,15 @@ import { newsService } from '@/services/newsService';
 import PaginationControl from '@/components/common/PaginationControl';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useToast } from "@/hooks/use-toast";
+import AdminArticleDetailModal from '@/components/modals/AdminArticleDetailModal';
+import { News } from '@/types/news';
 
 interface AdminArticlesProps {
     onAddArticle: () => void;
 }
 
 const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
-    const navigate = useNavigate();
+
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
@@ -26,6 +27,13 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [articleToDelete, setArticleToDelete] = useState<any>(null);
+    const [selectedArticle, setSelectedArticle] = useState<News | undefined>(undefined);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    const handleViewArticle = (article: News) => {
+        setSelectedArticle(article);
+        setIsDetailModalOpen(true);
+    };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -228,7 +236,7 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="sm" onClick={() => navigate(`/news/${article.id}`)}>
+                                                <Button variant="ghost" size="sm" onClick={() => handleViewArticle(article)}>
                                                     View
                                                 </Button>
                                                 <Button variant="ghost" size="sm">
@@ -278,6 +286,12 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                 }
                 confirmText="Delete"
                 variant="destructive"
+            />
+
+            <AdminArticleDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                article={selectedArticle}
             />
         </div>
     );
