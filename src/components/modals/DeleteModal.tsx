@@ -1,15 +1,7 @@
 
 import React from "react";
 import ConfirmActionModal from "./ConfirmActionModal";
-
-interface DeleteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title?: string;
-  description?: string;
-  itemName?: string;
-}
+import { DeleteModalProps } from "@/types/modals";
 
 const DeleteModal = ({
   isOpen,

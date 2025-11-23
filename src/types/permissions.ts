@@ -1,15 +1,22 @@
 
-export type UserRole = 'admin' | 'editor' | 'viewer';
+
 
 export interface Permission {
-  id: string;
+  id: number;
   name: string;
-  description: string;
-  roles: UserRole[];
+  slug: string;
+  description: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface RoleDefinition {
-  name: UserRole;
-  description: string;
-  permissions: string[];
+export interface Role {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  permissions: Permission[];
+  users_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }

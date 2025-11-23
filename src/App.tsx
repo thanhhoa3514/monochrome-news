@@ -18,6 +18,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
+import Editor from "./pages/Editor";
 import Contact from "./pages/Contact";
 import ModalDemo from "./components/ModalDemo";
 import SocialLogin from "./pages/SocialLogin";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/editor" element={<Editor />} />
               <Route path="/search" element={<Search />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/modal-demo" element={<ModalDemo />} />
