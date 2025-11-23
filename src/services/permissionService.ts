@@ -2,25 +2,7 @@ import { API_URL } from '@/config/environment';
 
 const API_BASE_URL = `${API_URL}/api/v1`;
 
-export interface Permission {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-    created_at?: string;
-    updated_at?: string;
-}
-
-export interface Role {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-    permissions: Permission[];
-    users_count?: number;
-    created_at?: string;
-    updated_at?: string;
-}
+import { Permission, Role } from '@/types/permissions';
 
 export const permissionService = {
     async getRoles(): Promise<Role[]> {

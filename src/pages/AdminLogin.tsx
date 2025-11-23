@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -37,32 +37,56 @@ export default function AdminLogin() {
             const response = await authService.login({ email, password });
             console.log(response);
 
-            if (response.user.roles[0].name !== 'admin') {
+            // Check if user has roles
+            if (!response.user.roles || response.user.roles.length === 0) {
                 toast({
                     title: "Access Denied",
-                    description: "You do not have permission to access this page.",
+                    description: "Your account has no assigned roles.",
                     variant: "destructive",
                 });
                 navigate('/login');
-            } else {
+                return;
+            }
+
+            // Check for specific roles across ALL assigned roles
+            const hasAdminRole = response.user.roles.some(role => role.slug === 'admin' || role.name === 'Admin' || role.name === 'admin');
+            const hasEditorRole = response.user.roles.some(role => role.slug === 'editor' || role.name === 'Editor' || role.name === 'editor');
+
+            if (hasAdminRole) {
                 // Update global auth state
                 login(response.user as User);
 
                 toast({
-                    title: "Welcome admin",
-                    description: "You have permission to access this page.",
+                    title: "Welcome Admin",
+                    description: "You have full access to the admin dashboard.",
                     variant: "default",
                 });
                 navigate('/admin');
+            } else if (hasEditorRole) {
+                // Update global auth state
+                login(response.user as User);
+
+                toast({
+                    title: "Welcome Editor",
+                    description: "You have access to the editor dashboard.",
+                    variant: "default",
+                });
+                navigate('/editor');
+            } else {
+                toast({
+                    title: "Access Denied",
+                    description: "You do not have permission to access this page. Only admin and editor roles are allowed.",
+                    variant: "destructive",
+                });
+                navigate('/login');
             }
 
         } catch (error: any) {
             toast({
-                title: "Access Denied",
-                description: error.message || "Invalid credentials or insufficient permissions.",
+                title: "Login Failed",
+                description: error.message || "Invalid credentials. Please check your email and password.",
                 variant: "destructive",
             });
-            navigate('/login');
         } finally {
             setIsLoading(false);
         }

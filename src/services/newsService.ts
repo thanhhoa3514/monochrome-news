@@ -1,13 +1,8 @@
 import { News, Category, PaginatedResponse, NewsQueryParams } from '@/types/news';
 import { API_URL } from '@/config/environment';
-
-// Extend NewsQueryParams to include status
-interface AdminNewsQueryParams extends NewsQueryParams {
-    status?: string;
-}
-
+import { CreateNewsInput } from '@/types/news';
+import { AdminNewsQueryParams } from '@/types/news';
 const API_BASE_URL = `${API_URL}/api/v1`;
-
 export const newsService = {
     /**
      * Get news
@@ -155,11 +150,10 @@ export const newsService = {
         tone: string;
         length: string;
         prompt?: string;
-    }): Promise<any[]> {
+    }): Promise<{ data: any[], generation_id?: string }> {
         const response = await fetch(`${API_BASE_URL}/news/ai-generate`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
@@ -171,8 +165,7 @@ export const newsService = {
             throw new Error('Failed to generate news');
         }
 
-        const data = await response.json();
-        return data.data;
+        return response.json();
     },
 
     /**
@@ -184,7 +177,6 @@ export const newsService = {
         const response = await fetch(`${API_BASE_URL}/news/${id}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                 'Accept': 'application/json',
             },
             credentials: 'include'
@@ -193,5 +185,27 @@ export const newsService = {
         if (!response.ok) {
             throw new Error('Failed to delete news');
         }
+    },
+    /**
+     * Create a news
+     * @param news news data
+     * @returns created news
+     */
+    async createNews(news: CreateNewsInput): Promise<News> {
+        const response = await fetch(`${API_BASE_URL}/news`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(news)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create news');
+        }
+
+        return response.json();
     }
 };
