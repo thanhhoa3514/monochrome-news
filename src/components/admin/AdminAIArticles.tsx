@@ -55,7 +55,7 @@ const AdminAIArticles = () => {
                 credentials: 'include'
             });
             const data = await response.json();
-            setHistory(data.data);
+            setHistory(Array.isArray(data.data) ? data.data : []);
         } catch (error) {
             console.error('Failed to fetch history:', error);
         } finally {

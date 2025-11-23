@@ -18,8 +18,8 @@ export const tagService = {
         const response = await fetch(`${API_BASE_URL}/tags?${queryParams.toString()}`, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -36,8 +36,8 @@ export const tagService = {
         const response = await fetch(`${API_BASE_URL}/tags/${id}`, {
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -56,9 +56,9 @@ export const tagService = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
             body: JSON.stringify(data),
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -74,13 +74,14 @@ export const tagService = {
      */
     async updateTag(id: number, data: UpdateTagInput): Promise<Tag> {
         const response = await fetch(`${API_BASE_URL}/tags/${id}`, {
-            method: 'PUT',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+
             },
             body: JSON.stringify(data),
+            credentials: 'include'
         });
 
         if (!response.ok) {
@@ -101,6 +102,7 @@ export const tagService = {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
+            credentials: 'include'
         });
 
         if (!response.ok) {
