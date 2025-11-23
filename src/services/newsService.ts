@@ -16,6 +16,7 @@ export const newsService = {
         if (params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params.category_id) queryParams.append('category_id', params.category_id.toString());
         if (params.is_premium !== undefined) queryParams.append('is_premium', params.is_premium.toString());
+        if (params.tag_id) queryParams.append('tag_id', params.tag_id.toString());
 
         let endpoint = '/news';
 
