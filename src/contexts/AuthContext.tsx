@@ -20,7 +20,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const checkAuth = async () => {
             try {
                 const data = await authService.me();
-                setUser(data.user);
+                if (data) {
+                    setUser(data.user);
+                } else {
+                    setUser(null);
+                }
             } catch (error) {
                 // Not authenticated or cookie expired
                 setUser(null);

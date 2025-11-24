@@ -8,7 +8,7 @@ export const permissionService = {
     async getRoles(): Promise<Role[]> {
         const response = await fetch(`${API_BASE_URL}/roles`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+
                 'Accept': 'application/json',
             },
             credentials: 'include'
@@ -24,7 +24,7 @@ export const permissionService = {
     async getPermissions(): Promise<Permission[]> {
         const response = await fetch(`${API_BASE_URL}/permissions`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+
                 'Accept': 'application/json',
             },
             credentials: 'include'
@@ -41,7 +41,7 @@ export const permissionService = {
         const response = await fetch(`${API_BASE_URL}/roles/${id}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
