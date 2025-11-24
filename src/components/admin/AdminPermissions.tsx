@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { permissionService, Role, Permission } from '@/services/permissionService';
+import { permissionService } from '@/services/permissionService';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Role, Permission } from '@/types/permissions';
 
 const AdminPermissions = () => {
   const queryClient = useQueryClient();
@@ -156,7 +157,7 @@ const AdminPermissions = () => {
       </div>
 
       {/* Role Cards with Save Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
         {roles.map(role => (
           <Card key={role.id} className={hasChanges[role.id] ? "border-yellow-400 bg-yellow-50/30" : ""}>
             <CardHeader className="pb-3">
@@ -215,50 +216,48 @@ const AdminPermissions = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCategories.map(category => (
-                <React.Fragment key={category}>
-                  {/* Category Header */}
-                  <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableCell colSpan={roles.length + 1} className="font-semibold py-2">
-                      {category} Management
-                    </TableCell>
-                  </TableRow>
+              {filteredCategories.map(category => [
+                // Category Header
+                <TableRow key={`${category}-header`} className="bg-muted/50 hover:bg-muted/50">
+                  <TableCell colSpan={roles.length + 1} className="font-semibold py-2">
+                    {category} Management
+                  </TableCell>
+                </TableRow>,
 
-                  {/* Permissions in Category */}
-                  {groupedPermissions[category]
-                    .filter(p =>
-                      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      p.description?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map(permission => (
-                      <TableRow key={permission.id}>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-sm">{permission.name}</span>
-                            <span className="text-xs text-muted-foreground">{permission.description}</span>
-                          </div>
-                        </TableCell>
-                        {roles.map(role => {
-                          const isAdmin = role.slug === 'admin' || role.slug === 'super-admin';
-                          const isChecked = isAdmin || (localPermissions[role.id]?.includes(permission.id) ?? false);
+                // Permissions in Category
+                ...groupedPermissions[category]
+                  .filter(p =>
+                    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .map(permission => (
+                    <TableRow key={permission.id}>
+                      <TableCell>
+                        <div className="flex flex-col ">
+                          <span className="font-medium text-sm">{permission.name}</span>
+                          <span className="text-xs text-muted-foreground">{permission.description}</span>
+                        </div>
+                      </TableCell>
+                      {roles.map(role => {
+                        const isAdmin = role.slug === 'admin' || role.slug === 'super-admin';
+                        const isChecked = isAdmin || (localPermissions[role.id]?.includes(permission.id) ?? false);
 
-                          return (
-                            <TableCell key={role.id} className="text-center">
-                              <div className="flex justify-center">
-                                <Checkbox
-                                  checked={isChecked}
-                                  disabled={isAdmin} // Lock admin permissions
-                                  onCheckedChange={() => handleTogglePermission(role.id, permission.id)}
-                                  className={isAdmin ? "data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400 cursor-not-allowed opacity-50" : ""}
-                                />
-                              </div>
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                </React.Fragment>
-              ))}
+                        return (
+                          <TableCell key={role.id} className="text-center">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={isChecked}
+                                disabled={isAdmin} // Lock admin permissions
+                                onCheckedChange={() => handleTogglePermission(role.id, permission.id)}
+                                className={isAdmin ? "data-[state=checked]:bg-gray-400 data-[state=checked]:border-gray-400 cursor-not-allowed opacity-50" : ""}
+                              />
+                            </div>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+              ])}
             </TableBody>
           </Table>
         </CardContent>

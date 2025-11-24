@@ -31,7 +31,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
-      <AdminHeader />
+      <AdminHeader selectedTab={selectedTab} />
 
       <div className="container px-4 py-6">
         <div className="flex flex-col md:flex-row gap-6">

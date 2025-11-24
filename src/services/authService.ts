@@ -112,6 +112,10 @@ export const authService = {
             credentials: 'include',
         });
 
+        if (response.status === 401) {
+            return null;
+        }
+
         const result = await response.json();
 
         if (!response.ok) {

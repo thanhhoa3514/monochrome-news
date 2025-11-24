@@ -212,5 +212,41 @@ export const newsService = {
         }
 
         return response.json();
+    },
+
+    /**
+     * Update a news
+     * @param id news ID
+     * @param news news data
+     * @returns updated news
+     */
+    async updateNews(id: number, news: CreateNewsInput | FormData): Promise<News> {
+        const isFormData = news instanceof FormData;
+
+        // For FormData with file uploads in Laravel, we must use POST with _method=PUT
+        // because PHP doesn't parse multipart/form-data on PUT requests natively
+        const method = isFormData ? 'POST' : 'PUT';
+
+        if (isFormData) {
+            news.append('_method', 'PUT');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+            method: method,
+            headers: isFormData ? {
+                'Accept': 'application/json',
+            } : {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+            body: isFormData ? news : JSON.stringify(news),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update news');
+        }
+
+        return response.json();
     }
 };
