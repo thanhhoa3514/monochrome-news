@@ -157,7 +157,7 @@ const AdminPermissions = () => {
       </div>
 
       {/* Role Cards with Save Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
         {roles.map(role => (
           <Card key={role.id} className={hasChanges[role.id] ? "border-yellow-400 bg-yellow-50/30" : ""}>
             <CardHeader className="pb-3">
@@ -233,7 +233,7 @@ const AdminPermissions = () => {
                   .map(permission => (
                     <TableRow key={permission.id}>
                       <TableCell>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col ">
                           <span className="font-medium text-sm">{permission.name}</span>
                           <span className="text-xs text-muted-foreground">{permission.description}</span>
                         </div>
