@@ -2,24 +2,31 @@
 import { useEffect, useState } from 'react';
 import Navbar from "../components/Navbar";
 import NewsList from "../components/NewsList";
-import CategoryList from "../components/CategoryList";
 import Footer from "../components/Footer";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/language-context";
 import { newsService } from "@/services/newsService";
 import { News } from "@/types/news";
 import { Loader2 } from "lucide-react";
+import HeroSection from "@/components/home/HeroSection";
+import NewsSidebar from "@/components/home/NewsSidebar";
+import CategorySection from "@/components/home/CategorySection";
 
 const Index = () => {
   const { t } = useLanguage();
   const [featuredArticles, setFeaturedArticles] = useState<News[]>([]);
   const [latestArticles, setLatestArticles] = useState<News[]>([]);
   const [popularArticles, setPopularArticles] = useState<News[]>([]);
+
+  // Category specific articles
+  const [techArticles, setTechArticles] = useState<News[]>([]);
+  const [businessArticles, setBusinessArticles] = useState<News[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch basic data
         const [featured, latest, popular] = await Promise.all([
           newsService.getFeaturedNews(),
           newsService.getLatestNews(),
@@ -29,6 +36,29 @@ const Index = () => {
         setFeaturedArticles(featured);
         setLatestArticles(latest);
         setPopularArticles(popular);
+
+        // Fetch category specific data (assuming slugs 'technology' and 'business' exist or using IDs if known)
+        // For now, let's try to fetch by category ID if we knew them, or search/filter
+        // Since we don't have hardcoded IDs, we might need to fetch categories first or just use placeholders
+        // Let's try to fetch by category slug if the API supports it, or just generic fetch with category_id param if we can guess
+
+        // Attempting to fetch specific categories - ideally we'd look up IDs first
+        // For demonstration, we'll fetch generic news and filter or just display latest as placeholder if specific fetch fails
+        // But let's try to be more robust:
+        const categories = await newsService.getCategories();
+        const techCat = categories.find(c => c.slug === 'technology' || c.name.toLowerCase().includes('tech'));
+        const businessCat = categories.find(c => c.slug === 'business' || c.name.toLowerCase().includes('business'));
+
+        if (techCat) {
+          const techRes = await newsService.getNews({ category_id: techCat.id, per_page: 4 });
+          setTechArticles(techRes.data);
+        }
+
+        if (businessCat) {
+          const businessRes = await newsService.getNews({ category_id: businessCat.id, per_page: 4 });
+          setBusinessArticles(businessRes.data);
+        }
+
       } catch (error) {
         console.error("Failed to fetch news:", error);
       } finally {
@@ -48,45 +78,42 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-secondary py-12">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="headline mb-4">
-              {t('home.hero.title')}
-            </h1>
-            <p className="text-lg max-w-xl mx-auto mb-8">
-              {t('home.hero.description')}
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button className="bg-actionRed hover:bg-actionRed-hover">
-                {t('home.hero.button.today')}
-              </Button>
-              <Button variant="outline">
-                {t('home.hero.button.explore')}
-              </Button>
+        {/* 1. Hero Section (Tin Nổi Bật) */}
+        <HeroSection articles={featuredArticles} />
+
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* 2. Main Content (70%) */}
+            <div className="lg:col-span-8">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold font-serif mb-6 border-b pb-2">
+                  {t('latest.news')}
+                </h2>
+                <NewsList articles={latestArticles} />
+              </div>
             </div>
+
+            {/* 3. Sidebar (30%) */}
+            <aside className="lg:col-span-4 pl-0 lg:pl-4">
+              <div className="sticky top-24">
+                <NewsSidebar trendingArticles={popularArticles} />
+              </div>
+            </aside>
           </div>
-        </section>
-
-        <div className="news-container">
-          {/* Featured Article */}
-          {featuredArticles.length > 0 && (
-            <NewsList articles={featuredArticles} featured={true} />
-          )}
-
-          {/* Latest News */}
-          <NewsList title={t('latest.news')} articles={latestArticles} />
-
-          {/* Categories */}
-          <CategoryList />
-
-          {/* Popular News */}
-          <NewsList title={t('popular.articles')} articles={popularArticles} />
         </div>
+
+        {/* 4. Category Blocks */}
+        {techArticles.length > 0 && (
+          <CategorySection title="Technology" articles={techArticles} />
+        )}
+
+        {businessArticles.length > 0 && (
+          <CategorySection title="Business" articles={businessArticles} />
+        )}
       </main>
 
       <Footer />

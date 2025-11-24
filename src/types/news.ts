@@ -35,6 +35,7 @@ export interface News {
     category?: Category;
     user?: User;
     tags?: Tag[];
+    summary?: string;
 }
 
 export interface PaginatedResponse<T> {
