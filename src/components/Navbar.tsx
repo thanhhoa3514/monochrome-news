@@ -19,10 +19,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const categories = [
-  { name: "politics", slug: "politique" },
-  { name: "economy", slug: "economie" },
-  { name: "tech", slug: "tech" },
-  { name: "sports", slug: "sport" },
+  { name: "politics", slug: "politics" },
+  { name: "economy", slug: "economy" },
+  { name: "tech", slug: "technology" },
+  { name: "sports", slug: "sports" },
   { name: "culture", slug: "culture" },
   { name: "science", slug: "science" },
 ];
