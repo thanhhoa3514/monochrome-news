@@ -135,9 +135,9 @@ const AiConfiguration: React.FC<AiConfigurationProps> = ({
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="short">Short (&lt; 300 words)</SelectItem>
-                            <SelectItem value="medium">Medium (300 - 1000 words)</SelectItem>
-                            <SelectItem value="long">Long Form (&gt; 1000 words)</SelectItem>
+                            <SelectItem value="short">Short (&lt; 1000 words)</SelectItem>
+                            <SelectItem value="medium">Medium (1000 - 2500 words)</SelectItem>
+                            <SelectItem value="long">Long Form (&gt; 3000 words)</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

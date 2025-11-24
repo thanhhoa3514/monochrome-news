@@ -12,6 +12,7 @@ import PaginationControl from '@/components/common/PaginationControl';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useToast } from "@/hooks/use-toast";
 import AdminArticleDetailModal from '@/components/modals/AdminArticleDetailModal';
+import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
 import { News } from '@/types/news';
 
 interface AdminArticlesProps {
@@ -30,9 +31,18 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
     const [selectedArticle, setSelectedArticle] = useState<News | undefined>(undefined);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
+    // Edit Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [articleToEdit, setArticleToEdit] = useState<News | undefined>(undefined);
+
     const handleViewArticle = (article: News) => {
         setSelectedArticle(article);
         setIsDetailModalOpen(true);
+    };
+
+    const handleEditArticle = (article: News) => {
+        setArticleToEdit(article);
+        setIsEditModalOpen(true);
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +179,7 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    <TableCell colSpan={6} className="h-24 text-center ">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                                             <p className="text-sm text-muted-foreground">Loading articles...</p>
@@ -187,7 +197,7 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                                 </TableRow>
                             ) : (
                                 articles.map((article) => (
-                                    <TableRow key={article.id}>
+                                    <TableRow key={article.id} className='cursor-pointer hover:bg-muted/50'>
                                         <TableCell>
                                             {article.thumbnail ? (
                                                 <img
@@ -239,7 +249,7 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                                                 <Button variant="ghost" size="sm" onClick={() => handleViewArticle(article)}>
                                                     View
                                                 </Button>
-                                                <Button variant="ghost" size="sm">
+                                                <Button variant="ghost" size="sm" onClick={() => handleEditArticle(article)}>
                                                     Edit
                                                 </Button>
                                                 <Button
@@ -292,6 +302,20 @@ const AdminArticles: React.FC<AdminArticlesProps> = ({ onAddArticle }) => {
                 isOpen={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
                 article={selectedArticle}
+            />
+
+            <AddEditArticleModal
+                isOpen={isEditModalOpen}
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setArticleToEdit(undefined);
+                }}
+                onSuccess={() => {
+                    queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
+                    setIsEditModalOpen(false);
+                    setArticleToEdit(undefined);
+                }}
+                initialData={articleToEdit}
             />
         </div>
     );

@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from '@/hooks/use-toast';
 import { userService, UserListItem } from '@/services/userService';
+import DeleteModal from '@/components/modals/DeleteModal';
+import AddEditUserModal from '@/components/modals/AddEditUserModal';
 
 const AdminUsers = () => {
     const [users, setUsers] = useState<UserListItem[]>([]);
@@ -17,6 +19,14 @@ const AdminUsers = () => {
     const [roleFilter, setRoleFilter] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [filtersOpen, setFiltersOpen] = useState(false);
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<UserListItem | null>(null);
+
+    // Add/Edit Modal State
+    const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState<UserListItem | undefined>(undefined);
 
     useEffect(() => {
         fetchUsers();
@@ -42,36 +52,52 @@ const AdminUsers = () => {
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
             user.email.toLowerCase().includes(userSearch.toLowerCase());
+
+        // Filter out admins and editors as requested
+        const isSubscriber = !user.roles.some(r => r.slug === 'admin' || r.slug === 'editor');
+
         // Note: Backend roles structure is array of objects, simple filter might need adjustment
         const matchesRole = roleFilter === 'all' || user.roles.some(r => r.slug === roleFilter);
         // Note: Backend user might not have status field yet, assuming active for now or check field
         const matchesStatus = statusFilter === 'all'; // || user.status === statusFilter;
-        return matchesSearch && matchesRole && matchesStatus;
+
+        return matchesSearch && matchesRole && matchesStatus && isSubscriber;
     });
 
-    const handleEditUser = (userId: number) => {
-        toast({
-            title: "Edit User",
-            description: `Edit user with ID: ${userId}`,
-        });
+    const handleAddUser = () => {
+        setUserToEdit(undefined);
+        setIsAddEditModalOpen(true);
     };
 
-    const handleDeleteUser = async (userId: number) => {
-        if (confirm('Are you sure you want to delete this user?')) {
-            try {
-                await userService.deleteUser(userId);
-                toast({
-                    title: "User Deleted",
-                    description: "User has been deleted successfully",
-                });
-                fetchUsers();
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to delete user",
-                    variant: "destructive"
-                });
-            }
+    const handleEditUser = (user: UserListItem) => {
+        setUserToEdit(user);
+        setIsAddEditModalOpen(true);
+    };
+
+    const handleDeleteClick = (user: UserListItem) => {
+        setUserToDelete(user);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDeleteUser = async () => {
+        if (!userToDelete) return;
+
+        try {
+            await userService.deleteUser(userToDelete.id);
+            toast({
+                title: "User Deleted",
+                description: `User "${userToDelete.name}" has been deleted successfully`,
+            });
+            fetchUsers();
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to delete user",
+                variant: "destructive"
+            });
+        } finally {
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
         }
     };
 
@@ -129,14 +155,12 @@ const AdminUsers = () => {
                                     onChange={(e) => setRoleFilter(e.target.value)}
                                 >
                                     <option value="all">All Roles</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="editor">Editor</option>
                                     <option value="viewer">Viewer</option>
                                 </select>
                             </div>
                         </CollapsibleContent>
                     </Collapsible>
-                    <Button className="shrink-0 bg-primary text-primary-foreground">
+                    <Button className="shrink-0 bg-primary text-primary-foreground" onClick={handleAddUser}>
                         <UserRoundPlus className="h-4 w-4 mr-1" /> New User
                     </Button>
                 </div>
@@ -161,14 +185,14 @@ const AdminUsers = () => {
                                     <TableCell>{getRoleBadge(user.roles)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => handleEditUser(user.id)}>
+                                            <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
                                                 Edit
                                             </Button>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="text-destructive"
-                                                onClick={() => handleDeleteUser(user.id)}
+                                                className="text-destructive hover:bg-destructive/10"
+                                                onClick={() => handleDeleteClick(user)}
                                             >
                                                 Delete
                                             </Button>
@@ -180,6 +204,25 @@ const AdminUsers = () => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDeleteUser}
+                itemName={userToDelete?.name}
+                title="Delete User"
+                description="Are you sure you want to delete this user? This action cannot be undone and will remove all their data."
+            />
+
+            <AddEditUserModal
+                isOpen={isAddEditModalOpen}
+                onClose={() => setIsAddEditModalOpen(false)}
+                onSuccess={() => {
+                    fetchUsers();
+                    setIsAddEditModalOpen(false);
+                }}
+                user={userToEdit}
+            />
         </div>
     );
 };

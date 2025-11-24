@@ -248,12 +248,12 @@ const AdminAIArticles = () => {
                         )}
                         <div>
                             <h2 className="text-3xl font-bold font-serif tracking-tight">AI News Generator</h2>
-                            <p className="text-muted-foreground">Powered by Google Gemini AI</p>
+                            <p className="text-muted-foreground">Google Gemini AI</p>
                         </div>
                     </div>
                     <Badge variant="outline" className="px-3 py-1 border-primary/20 bg-primary/5 text-primary">
                         <Sparkles className="w-3 h-3 mr-2 fill-primary" />
-                        AI Model: Gemini 1.5 Flash
+                        AI Model: Gemini
                     </Badge>
                 </div>
 
