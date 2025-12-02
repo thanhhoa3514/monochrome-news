@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminDashboard from '@/components/admin/AdminDashboard';
@@ -9,25 +10,24 @@ import AdminPermissions from '@/components/admin/AdminPermissions';
 import AdminAIArticles from '@/components/admin/AdminAIArticles';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminTags from '@/components/admin/AdminTags';
+import AdminProfile from '@/components/admin/AdminProfile';
 
+type TabType = 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags' | 'profile';
 
-import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
-import { useToast } from '@/hooks/use-toast';
-type TabType = 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags';
-
-
+const validTabs: TabType[] = ['dashboard', 'articles', 'users', 'subscriptions', 'permissions', 'settings', 'ai-articles', 'tags', 'profile'];
 
 const Admin = () => {
-  const { toast } = useToast();
-  const [selectedTab, setSelectedTab] = useState<TabType>('dashboard');
+  const { tab } = useParams<{ tab?: string }>();
+  const navigate = useNavigate();
   const [isAddArticleModalOpen, setIsAddArticleModalOpen] = useState(false);
-  const handleAddArticle = (articleData: any) => {
-    toast({
-      title: "Article Added",
-      description: `New article "${articleData.title}" has been created successfully.`,
-      variant: "default",
-    });
+
+  // Validate tab from URL, default to 'dashboard'
+  const selectedTab: TabType = validTabs.includes(tab as TabType) ? (tab as TabType) : 'dashboard';
+
+  const setSelectedTab = (newTab: TabType) => {
+    navigate(`/admin/${newTab}`);
   };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
@@ -48,16 +48,10 @@ const Admin = () => {
             {selectedTab === 'ai-articles' && <AdminAIArticles />}
             {selectedTab === 'tags' && <AdminTags />}
             {selectedTab === 'settings' && <AdminSettings />}
+            {selectedTab === 'profile' && <AdminProfile />}
           </main>
         </div>
       </div>
-
-      {/* Modals */}
-      {/* <AddEditArticleModal
-        isOpen={isAddArticleModalOpen}
-        onClose={() => setIsAddArticleModalOpen(false)}
-        onSubmit={handleAddArticle}
-      /> */}
     </div>
   );
 }

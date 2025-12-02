@@ -37,14 +37,6 @@ const Index = () => {
         setLatestArticles(latest);
         setPopularArticles(popular);
 
-        // Fetch category specific data (assuming slugs 'technology' and 'business' exist or using IDs if known)
-        // For now, let's try to fetch by category ID if we knew them, or search/filter
-        // Since we don't have hardcoded IDs, we might need to fetch categories first or just use placeholders
-        // Let's try to fetch by category slug if the API supports it, or just generic fetch with category_id param if we can guess
-
-        // Attempting to fetch specific categories - ideally we'd look up IDs first
-        // For demonstration, we'll fetch generic news and filter or just display latest as placeholder if specific fetch fails
-        // But let's try to be more robust:
         const categories = await newsService.getCategories();
         const techCat = categories.find(c => c.slug === 'technology' || c.name.toLowerCase().includes('tech'));
         const businessCat = categories.find(c => c.slug === 'business' || c.name.toLowerCase().includes('business'));
