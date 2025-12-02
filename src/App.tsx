@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./lib/language-context";
 import { AuthProvider } from "./contexts/AuthContext";
+import { PrivateRoute, AdminRoute } from "./components/PrivateRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -39,13 +40,13 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/social-login" element={<SocialLogin />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/category/:slug" element={<CategoryPage />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/editor" element={<Editor />} />
+              <Route path="/editor" element={<AdminRoute><Editor /></AdminRoute>} />
               <Route path="/search" element={<Search />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/pricing" element={<PricingPage />} />

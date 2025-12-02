@@ -132,7 +132,7 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData }: AddEdi
         // Update existing news
         const formDataToSend = new FormData();
         formDataToSend.append('title', formData.title);
-        formDataToSend.append('slug', generateSlug(formData.title)); // Regenerate slug or keep existing? Usually keep existing or allow edit. For now regenerate to match title.
+        formDataToSend.append('slug', generateSlug(formData.title)); 
         formDataToSend.append('content', formData.content);
         formDataToSend.append('category_id', formData.category_id);
         formDataToSend.append('user_id', user.id.toString());

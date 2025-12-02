@@ -46,11 +46,17 @@ export default function Login() {
         description: `Chào mừng trở lại, ${response.user.name}.`,
       });
 
-      navigate('/');
-    } catch (error: any) {
+      // Check if user is admin and redirect accordingly
+      const isAdmin = response.user.roles?.some(role => role.name === 'Admin' || role.name === 'admin');
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error: unknown) {
       toast({
         title: "Lỗi đăng nhập",
-        description: error.message || "Email hoặc mật khẩu không đúng.",
+        description: "Email hoặc mật khẩu không đúng.",
         variant: "destructive",
       });
     } finally {
