@@ -12,9 +12,11 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+type TabType = 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags' | 'profile';
+
 interface AdminSidebarProps {
-    selectedTab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags';
-    setSelectedTab: (tab: 'dashboard' | 'articles' | 'users' | 'subscriptions' | 'permissions' | 'settings' | 'ai-articles' | 'tags') => void;
+    selectedTab: TabType;
+    setSelectedTab: (tab: TabType) => void;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ selectedTab, setSelectedTab }) => {

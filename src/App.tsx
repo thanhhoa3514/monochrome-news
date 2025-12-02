@@ -38,13 +38,15 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/user/forgot-password" element={<ForgotPassword />} />
               <Route path="/social-login" element={<SocialLogin />} />
-              <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+              <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+              <Route path="/user/setting" element={<Profile />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+              <Route path="/admin/:tab" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/editor" element={<AdminRoute><Editor /></AdminRoute>} />
               <Route path="/search" element={<Search />} />
