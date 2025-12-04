@@ -23,6 +23,7 @@ import Editor from "./pages/Editor";
 import Contact from "./pages/Contact";
 import SocialLogin from "./pages/SocialLogin";
 import Profile from "./pages/Profile";
+import TagPage from "./pages/TagPage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/category/:slug" element={<CategoryPage />} />
+              <Route path="/tag/:slug" element={<TagPage />} />
               <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/:tab" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/login" element={<AdminLogin />} />

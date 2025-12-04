@@ -219,9 +219,11 @@ export default function NewsDetail() {
               {article.tags && article.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-6 border-t">
                   {article.tags.map(tag => (
-                    <Badge key={tag.id} variant="secondary" className="px-3 py-1 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
-                      #{tag.name}
-                    </Badge>
+                    <Link key={tag.id} to={`/tag/${tag.slug || tag.id}`}>
+                      <Badge variant="secondary" className="px-3 py-1 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
+                        #{tag.name}
+                      </Badge>
+                    </Link>
                   ))}
                 </div>
               )}

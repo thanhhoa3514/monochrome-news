@@ -8,20 +8,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { FileText, Sparkles, LayoutDashboard } from 'lucide-react';
 
-type TabType = 'dashboard' | 'articles' | 'ai-articles';
+
+type TabType = 'dashboard' | 'articles' | 'permissions' | 'settings' | 'ai-articles' | 'tags' | 'profile';
+
+const validTabs: TabType[] = [ 'dashboard' ,'articles',  'permissions', 'settings', 'ai-articles', 'tags', 'profile'];
+
 
 const Editor = () => {
     const { toast } = useToast();
     const [selectedTab, setSelectedTab] = useState<TabType>('dashboard');
     const [isAddArticleModalOpen, setIsAddArticleModalOpen] = useState(false);
 
-    const handleAddArticle = (articleData: any) => {
-        toast({
-            title: "Article Added",
-            description: `New article "${articleData.title}" has been created successfully.`,
-            variant: "default",
-        });
-    };
 
     const tabs = [
         { id: 'dashboard' as TabType, label: 'Dashboard', icon: LayoutDashboard },
@@ -32,7 +29,7 @@ const Editor = () => {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <AdminHeader />
+             <AdminHeader selectedTab={selectedTab} />
 
             <div className="container px-4 py-6">
                 <div className="flex flex-col md:flex-row gap-6">
@@ -69,18 +66,7 @@ const Editor = () => {
                 </div>
             </div>
 
-            {/* Modals */}
-            <AddEditArticleModal
-                isOpen={isAddArticleModalOpen}
-                onClose={() => setIsAddArticleModalOpen(false)}
-                onSuccess={() => {
-                    setIsAddArticleModalOpen(false);
-                    toast({
-                        title: "Success",
-                        description: "Article created successfully",
-                    });
-                }}
-            />
+            
         </div>
     );
 };
