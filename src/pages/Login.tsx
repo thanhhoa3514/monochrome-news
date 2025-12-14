@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/language-context';
 import { Facebook, Mail } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/config/environment';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -140,7 +141,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    window.location.href = 'http://localhost:8000/api/v1/auth/google';
+                    window.location.href = `${API_URL}/api/v1/auth/google`;
                   }}
                 >
                   <Mail className="mr-2 h-4 w-4" />
@@ -150,7 +151,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    window.location.href = 'http://localhost:8000/api/v1/auth/facebook';
+                    window.location.href = `${API_URL}/api/v1/auth/facebook`;
                   }}
                 >
                   <Facebook className="mr-2 h-4 w-4" />
