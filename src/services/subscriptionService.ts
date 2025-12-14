@@ -1,6 +1,8 @@
 import { API_URL } from '@/config/environment';
 import { Subscription, SubscriptionResponse, SubscriptionParams } from '@/types/subscription';
 
+const API_BASE_URL = `${API_URL}/api/v1`;
+
 const subscriptionService = {
     getAll: async (params: SubscriptionParams = {}): Promise<SubscriptionResponse> => {
         const queryParams = new URLSearchParams();
@@ -12,7 +14,7 @@ const subscriptionService = {
         // Note: Search might need a separate endpoint or update to backend index method
         // For now we'll handle what we can
 
-        const response = await fetch(`${API_URL}/subscriptions?${queryParams.toString()}`, {
+        const response = await fetch(`${API_BASE_URL}/subscriptions?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Fallback if cookie not working
                 'Accept': 'application/json',
@@ -28,7 +30,7 @@ const subscriptionService = {
     },
 
     cancel: async (id: number) => {
-        const response = await fetch(`${API_URL}/subscriptions/${id}/cancel`, {
+        const response = await fetch(`${API_BASE_URL}/subscriptions/${id}/cancel`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -44,7 +46,7 @@ const subscriptionService = {
     },
 
     activate: async (id: number) => {
-        const response = await fetch(`${API_URL}/api/v1/subscriptions/${id}/activate`, {
+        const response = await fetch(`${API_BASE_URL}/subscriptions/${id}/activate`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -62,7 +64,7 @@ const subscriptionService = {
     // Get current user's active subscription
     getCurrentSubscription: async (): Promise<Subscription | null> => {
         try {
-            const response = await fetch(`${API_URL}/api/v1/subscriptions?status=active&per_page=1`, {
+            const response = await fetch(`${API_BASE_URL}/subscriptions?status=active&per_page=1`, {
                 headers: {
                     'Accept': 'application/json',
                 },
