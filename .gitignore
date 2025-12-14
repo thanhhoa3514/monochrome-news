@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 .cursor/rules/user-rule.mdc
 *.md
+.env
