@@ -24,6 +24,7 @@ import Contact from "./pages/Contact";
 import SocialLogin from "./pages/SocialLogin";
 import Profile from "./pages/Profile";
 import TagPage from "./pages/TagPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/checkout/:planId" element={<CheckoutPage />} />
+              <Route path="/payment-success" element={<PaymentSuccessPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
