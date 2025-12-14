@@ -4,8 +4,9 @@ import {
   AuthResponse,
   VerifyOtpData,
 } from "@/types/auth/auth";
+import { API_URL } from "@/config/environment";
 
-const API_BASE_URL = "http://localhost:8000/api/v1";
+const API_BASE_URL = `${API_URL}/api/v1`;
 
 export const authService = {
   async register(data: RegisterData) {
