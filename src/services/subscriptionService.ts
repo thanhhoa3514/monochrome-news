@@ -44,7 +44,7 @@ const subscriptionService = {
     },
 
     activate: async (id: number) => {
-        const response = await fetch(`${API_URL}/subscriptions/${id}/activate`, {
+        const response = await fetch(`${API_URL}/api/v1/subscriptions/${id}/activate`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -57,6 +57,27 @@ const subscriptionService = {
         }
 
         return response.json();
+    },
+
+    // Get current user's active subscription
+    getCurrentSubscription: async (): Promise<Subscription | null> => {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/subscriptions?status=active&per_page=1`, {
+                headers: {
+                    'Accept': 'application/json',
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                return null;
+            }
+
+            const data: SubscriptionResponse = await response.json();
+            return data.data.length > 0 ? data.data[0] : null;
+        } catch {
+            return null;
+        }
     }
 };
 

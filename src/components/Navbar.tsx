@@ -1,13 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Search, User, LogOut } from 'lucide-react';
+import { Menu, X, Search, User, LogOut, Crown, Sparkles } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '@/lib/language-context';
 import SearchCommand from './SearchCommand';
 import { useAuth } from '@/contexts/AuthContext';
+import subscriptionService from '@/services/subscriptionService';
+import { Subscription } from '@/types/subscription';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const categories = [
   { name: "politics", slug: "politics" },
@@ -27,11 +30,38 @@ const categories = [
   { name: "science", slug: "science" },
 ];
 
+// Plan badge styles
+const getPlanBadgeStyle = (planName?: string) => {
+  const name = planName?.toLowerCase() || '';
+  if (name.includes('premium') || name.includes('pro')) {
+    return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/25';
+  }
+  if (name.includes('basic') || name.includes('starter')) {
+    return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0';
+  }
+  return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-0';
+};
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const { t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Fetch user's subscription when authenticated
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (isAuthenticated) {
+        const sub = await subscriptionService.getCurrentSubscription();
+        setSubscription(sub);
+      } else {
+        setSubscription(null);
+      }
+    };
+
+    fetchSubscription();
+  }, [isAuthenticated]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -43,8 +73,11 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
+    setSubscription(null);
     setIsMenuOpen(false);
   };
+
+  const hasActiveSubscription = subscription?.status === 'active';
 
   return (
     <header className="border-b border-border sticky top-0 bg-background z-50">
@@ -72,12 +105,26 @@ export default function Navbar() {
 
           {/* Actions Group */}
           <div className="flex items-center space-x-2">
-            {/* Upgrade Button */}
-            <Button variant="outline" className="hidden md:flex border-actionRed text-actionRed hover:bg-actionRed hover:text-white transition-colors" asChild>
-              <Link to="/pricing">
-                Upgrade
-              </Link>
-            </Button>
+            {/* Subscription Badge or Upgrade Button */}
+            {isAuthenticated && hasActiveSubscription ? (
+              <Badge
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium ${getPlanBadgeStyle(subscription?.plan?.name)}`}
+              >
+                <Crown className="h-3.5 w-3.5" />
+                {subscription?.plan?.name || 'Premium'}
+              </Badge>
+            ) : (
+              <Button
+                variant="outline"
+                className="hidden md:flex border-actionRed text-actionRed hover:bg-actionRed hover:text-white transition-colors gap-1.5"
+                asChild
+              >
+                <Link to="/pricing">
+                  <Sparkles className="h-4 w-4" />
+                  Upgrade
+                </Link>
+              </Button>
+            )}
 
             {/* Search */}
             <Button variant="ghost" size="icon" onClick={toggleSearch}>
@@ -105,7 +152,14 @@ export default function Navbar() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium leading-none">{user.name}</p>
+                          {hasActiveSubscription && (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {subscription?.plan?.name}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>
@@ -118,6 +172,14 @@ export default function Navbar() {
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
+                    {!hasActiveSubscription && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/pricing" className="cursor-pointer text-actionRed">
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          <span>Upgrade Plan</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
                       <LogOut className="mr-2 h-4 w-4" />
@@ -175,10 +237,25 @@ export default function Navbar() {
                         <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium">{user.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{user.name}</span>
+                          {hasActiveSubscription && (
+                            <Badge className={`text-[10px] px-1.5 py-0 ${getPlanBadgeStyle(subscription?.plan?.name)}`}>
+                              {subscription?.plan?.name}
+                            </Badge>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">{user.email}</span>
                       </div>
                     </div>
+                    {!hasActiveSubscription && (
+                      <Link to="/pricing" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full border-actionRed text-actionRed hover:bg-actionRed hover:text-white">
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Upgrade Plan
+                        </Button>
+                      </Link>
+                    )}
                     <Button
                       variant="ghost"
                       className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100/10"
