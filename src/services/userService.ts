@@ -1,4 +1,5 @@
 import { API_URL } from '@/config/environment';
+import { getAuthHeaders, getAuthHeadersWithJson } from './apiHelper';
 
 const API_BASE_URL = `${API_URL}/api/v1`;
 
@@ -56,9 +57,7 @@ export const userService = {
      */
     async getUsers(page: number = 1, perPage: number = 10): Promise<PaginatedUserResponse> {
         const response = await fetch(`${API_BASE_URL}/users?page=${page}&per_page=${perPage}`, {
-            headers: {
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeaders(),
             credentials: 'include',
         });
 
@@ -74,9 +73,7 @@ export const userService = {
      */
     async getUserById(id: number): Promise<UserListItem> {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            headers: {
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeaders(),
             credentials: 'include',
         });
 
@@ -93,10 +90,7 @@ export const userService = {
     async createUser(user: CreateUserInput): Promise<UserListItem> {
         const response = await fetch(`${API_BASE_URL}/users`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeadersWithJson(),
             credentials: 'include',
             body: JSON.stringify(user),
         });
@@ -114,10 +108,7 @@ export const userService = {
     async updateUser(id: number, user: UpdateUserInput): Promise<UserListItem> {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeadersWithJson(),
             credentials: 'include',
             body: JSON.stringify(user),
         });
@@ -135,9 +126,7 @@ export const userService = {
     async deleteUser(id: number): Promise<void> {
         const response = await fetch(`${API_BASE_URL}/users/${id}`, {
             method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeaders(),
             credentials: 'include',
         });
 
@@ -146,3 +135,4 @@ export const userService = {
         }
     },
 };
+

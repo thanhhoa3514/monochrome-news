@@ -43,16 +43,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = async () => {
         try {
+            const token = localStorage.getItem('auth_token');
             await fetch(`${API_URL}/api/v1/auth/logout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 credentials: 'include',
             });
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
+            // Always clear token and user state
+            localStorage.removeItem('auth_token');
             setUser(null);
         }
     };

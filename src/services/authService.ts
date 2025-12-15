@@ -64,14 +64,18 @@ export const authService = {
       credentials: "include",
     });
 
-    console.log('[AuthService] Response status:', response.status);
-    console.log('[AuthService] Response headers:', Object.fromEntries(response.headers.entries()));
 
     const result = await response.json();
-    console.log('[AuthService] Response body:', result);
+
 
     if (!response.ok) {
       throw new Error(result.message || "Login failed");
+    }
+
+    // Store token in localStorage for cross-origin requests
+    if (result.token) {
+      localStorage.setItem('auth_token', result.token);
+      console.log('[AuthService] Token saved to localStorage');
     }
 
     return result;
@@ -118,15 +122,25 @@ export const authService = {
   },
 
   async me() {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
       credentials: "include",
     });
 
     if (response.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('auth_token');
       return null;
     }
 

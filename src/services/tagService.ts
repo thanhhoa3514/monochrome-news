@@ -1,5 +1,6 @@
 import { Tag, CreateTagInput, UpdateTagInput, TagQueryParams, PaginatedTagResponse } from '@/types/tag';
 import { API_URL } from '@/config/environment';
+import { getAuthHeaders, getAuthHeadersWithJson } from './apiHelper';
 
 const API_BASE_URL = `${API_URL}/api/v1`;
 
@@ -16,9 +17,7 @@ export const tagService = {
         if (params.all) queryParams.append('all', '1');
 
         const response = await fetch(`${API_BASE_URL}/tags?${queryParams.toString()}`, {
-            headers: {
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeaders(),
             credentials: 'include'
         });
 
@@ -34,9 +33,7 @@ export const tagService = {
      */
     async getTag(id: number): Promise<Tag> {
         const response = await fetch(`${API_BASE_URL}/tags/${id}`, {
-            headers: {
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeaders(),
             credentials: 'include'
         });
 
@@ -53,10 +50,7 @@ export const tagService = {
     async createTag(data: CreateTagInput): Promise<Tag> {
         const response = await fetch(`${API_BASE_URL}/tags`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeadersWithJson(),
             body: JSON.stringify(data),
             credentials: 'include'
         });
@@ -75,11 +69,7 @@ export const tagService = {
     async updateTag(id: number, data: UpdateTagInput): Promise<Tag> {
         const response = await fetch(`${API_BASE_URL}/tags/${id}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-
-            },
+            headers: getAuthHeadersWithJson(),
             body: JSON.stringify(data),
             credentials: 'include'
         });
@@ -98,10 +88,7 @@ export const tagService = {
     async deleteTag(id: number): Promise<void> {
         const response = await fetch(`${API_BASE_URL}/tags/${id}`, {
             method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
+            headers: getAuthHeaders(),
             credentials: 'include'
         });
 
@@ -110,3 +97,4 @@ export const tagService = {
         }
     }
 };
+
