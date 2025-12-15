@@ -7,6 +7,7 @@ import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
 import { newsService } from '@/services/newsService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Category } from '@/types/news';
+import { API_URL } from '@/config/environment';
 
 // Import Sub-components
 import AiHistorySidebar from './ai/AiHistorySidebar';
@@ -45,7 +46,7 @@ const AdminAIArticles = () => {
     const fetchHistory = async () => {
         setIsLoadingHistory(true);
         try {
-            const response = await fetch('http://localhost:8000/api/v1/ai-generations', {
+            const response = await fetch(`${API_URL}/api/v1/ai-generations`, {
                 headers: {
                     'Accept': 'application/json',
                 },
@@ -154,7 +155,7 @@ const AdminAIArticles = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/news/publish-ai', {
+            const response = await fetch(`${API_URL}/api/v1/news/publish-ai`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
