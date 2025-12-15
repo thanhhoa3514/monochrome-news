@@ -50,7 +50,11 @@ export const authService = {
   },
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const loginUrl = `${API_BASE_URL}/auth/login`;
+    console.log('[AuthService] Login URL:', loginUrl);
+    console.log('[AuthService] Credentials:', { email: credentials.email, password: '***' });
+
+    const response = await fetch(loginUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +64,11 @@ export const authService = {
       credentials: "include",
     });
 
+    console.log('[AuthService] Response status:', response.status);
+    console.log('[AuthService] Response headers:', Object.fromEntries(response.headers.entries()));
+
     const result = await response.json();
+    console.log('[AuthService] Response body:', result);
 
     if (!response.ok) {
       throw new Error(result.message || "Login failed");
