@@ -124,6 +124,13 @@ const translations = {
     'contact.form.submit': 'Gửi tin nhắn',
     'contact.form.sending': 'Đang gửi...',
     'contact.success': 'Đã gửi tin nhắn',
+    'read.more': 'Đọc thêm',
+    'category.culture.desc': 'Tin tức về văn hóa',
+    'category.sports.desc': 'Tin tức về thể thao',
+    'category.tech.desc': 'Tin tức về công nghệ',
+    'category.science.desc': 'Tin tức về khoa học',
+    'category.politics.desc': 'Tin tức về chính trị',
+    'category.economy.desc': 'Tin tức về kinh tế',
     'contact.success.desc': 'Chúng tôi sẽ phản hồi bạn sớm nhất có thể.'
   },
   en: {
@@ -236,6 +243,13 @@ const translations = {
     'contact.form.submit': 'Send Message',
     'contact.form.sending': 'Sending...',
     'contact.success': 'Message Sent',
+    'category.sports.desc': 'Latest news and updates in sports',
+    'category.culture.desc': 'Latest news and updates in culture',
+    'category.tech.desc': 'Latest news and updates in technology',
+    'category.science.desc': 'Latest news and updates in science',
+    'category.politics.desc': 'Latest news and updates in politics',
+    'category.economy.desc': 'Latest news and updates in economy',
+
     'contact.success.desc': 'We will get back to you as soon as possible.'
   }
 };
