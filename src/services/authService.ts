@@ -150,11 +150,17 @@ export const authService = {
   },
 
   async updateProfile(data: FormData) {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
       body: data,
       credentials: "include",
     });
@@ -173,12 +179,18 @@ export const authService = {
     newPassword: string,
     newPasswordConfirmation: string
   ) {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify({
         current_password: currentPassword,
         new_password: newPassword,

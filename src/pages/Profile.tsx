@@ -5,7 +5,10 @@ import { authService } from '@/services/authService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, User as UserIcon, CreditCard, Calendar, Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, User as UserIcon, CreditCard, Calendar, Shield, Pencil, Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
@@ -36,11 +39,24 @@ interface UserProfile {
 }
 
 export default function Profile() {
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, logout, login } = useAuth();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { toast } = useToast();
+
+    // Edit Profile Modal State
+    const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+    const [editName, setEditName] = useState('');
+    const [editAvatar, setEditAvatar] = useState<File | null>(null);
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    // Change Password Modal State
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -70,6 +86,81 @@ export default function Profile() {
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    // Open Edit Profile Modal
+    const openEditProfile = () => {
+        if (profile) {
+            setEditName(profile.name);
+            setEditAvatar(null);
+        }
+        setIsEditProfileOpen(true);
+    };
+
+    // Handle Edit Profile Submit
+    const handleUpdateProfile = async () => {
+        if (!editName.trim()) {
+            toast({ title: "Error", description: "Name is required", variant: "destructive" });
+            return;
+        }
+
+        setIsUpdatingProfile(true);
+        try {
+            const formData = new FormData();
+            formData.append('name', editName);
+            if (editAvatar) {
+                formData.append('avatar', editAvatar);
+            }
+
+            const result = await authService.updateProfile(formData);
+
+            // Update local profile state
+            setProfile(prev => prev ? { ...prev, name: editName, avatar: result.user?.avatar || prev.avatar } : null);
+
+            // Update auth context
+            if (result.user) {
+                login(result.user);
+            }
+
+            toast({ title: "Success", description: "Profile updated successfully!" });
+            setIsEditProfileOpen(false);
+        } catch (error: any) {
+            toast({ title: "Error", description: error.message || "Failed to update profile", variant: "destructive" });
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
+    // Handle Change Password Submit
+    const handleChangePassword = async () => {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            toast({ title: "Error", description: "All fields are required", variant: "destructive" });
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            toast({ title: "Error", description: "New passwords do not match", variant: "destructive" });
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
+            return;
+        }
+
+        setIsChangingPassword(true);
+        try {
+            await authService.changePassword(currentPassword, newPassword, confirmPassword);
+            toast({ title: "Success", description: "Password changed successfully!" });
+            setIsChangePasswordOpen(false);
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error: any) {
+            toast({ title: "Error", description: error.message || "Failed to change password", variant: "destructive" });
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
     if (loading) {
@@ -157,7 +248,6 @@ export default function Profile() {
                                                 <Button variant="outline" onClick={() => navigate('/pricing')}>
                                                     Change Plan
                                                 </Button>
-                                                {/* Add Cancel Subscription logic here if needed */}
                                             </div>
                                         </div>
                                     ) : (
@@ -171,7 +261,7 @@ export default function Profile() {
                                 </CardContent>
                             </Card>
 
-                            {/* Additional Settings or Info can go here */}
+                            {/* Account Settings */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center">
@@ -181,10 +271,12 @@ export default function Profile() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid gap-2">
-                                        <Button variant="outline" className="justify-start">
+                                        <Button variant="outline" className="justify-start" onClick={() => setIsChangePasswordOpen(true)}>
+                                            <Lock className="w-4 h-4 mr-2" />
                                             Change Password
                                         </Button>
-                                        <Button variant="outline" className="justify-start">
+                                        <Button variant="outline" className="justify-start" onClick={openEditProfile}>
+                                            <Pencil className="w-4 h-4 mr-2" />
                                             Edit Profile
                                         </Button>
                                     </div>
@@ -195,6 +287,97 @@ export default function Profile() {
                 </div>
             </main>
             <Footer />
+
+            {/* Edit Profile Dialog */}
+            <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Profile</DialogTitle>
+                        <DialogDescription>Update your profile information</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Name</Label>
+                            <Input
+                                id="name"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="Your name"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="avatar">Avatar</Label>
+                            <Input
+                                id="avatar"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setEditAvatar(e.target.files?.[0] || null)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditProfileOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleUpdateProfile} disabled={isUpdatingProfile}>
+                            {isUpdatingProfile && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            Save Changes
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Change Password Dialog */}
+            <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Change Password</DialogTitle>
+                        <DialogDescription>Enter your current password and a new password</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="currentPassword">Current Password</Label>
+                            <Input
+                                id="currentPassword"
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="newPassword">New Password</Label>
+                            <Input
+                                id="newPassword"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsChangePasswordOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+                            {isChangingPassword && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            Change Password
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
+
