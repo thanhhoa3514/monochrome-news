@@ -27,13 +27,11 @@ const AuthCallback = () => {
                 // Store token in localStorage if provided (for cross-origin auth)
                 if (tokenParam) {
                     localStorage.setItem('auth_token', tokenParam);
-                    console.log('[AuthCallback] Token saved to localStorage');
                 }
 
                 login(user);
                 navigate('/');
             } catch (err) {
-                console.error('Failed to parse user data:', err);
                 setError('Failed to process authentication. Please try again.');
                 setTimeout(() => navigate('/login'), 3000);
             }

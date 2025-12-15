@@ -51,9 +51,6 @@ export const authService = {
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const loginUrl = `${API_BASE_URL}/auth/login`;
-    console.log('[AuthService] Login URL:', loginUrl);
-    console.log('[AuthService] Credentials:', { email: credentials.email, password: '***' });
-
     const response = await fetch(loginUrl, {
       method: "POST",
       headers: {
@@ -75,7 +72,6 @@ export const authService = {
     // Store token in localStorage for cross-origin requests
     if (result.token) {
       localStorage.setItem('auth_token', result.token);
-      console.log('[AuthService] Token saved to localStorage');
     }
 
     return result;
