@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/types/auth/auth';
 import { authService } from '@/services/authService';
+import { API_URL } from '@/config/environment';
 
 interface AuthContextType {
     user: User | null;
@@ -42,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = async () => {
         try {
-            await fetch('http://localhost:8000/api/v1/auth/logout', {
+            await fetch(`${API_URL}/api/v1/auth/logout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
