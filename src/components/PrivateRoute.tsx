@@ -56,4 +56,32 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * EditorRoute - Bảo vệ route yêu cầu quyền editor hoặc admin
+ * Admin có thể truy cập tất cả, Editor chỉ có quyền hạn hẹp hơn
+ */
+export const EditorRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Check if user is admin or editor
+  const hasEditorAccess = user?.roles?.some(
+    role => ['ADMIN', 'Admin', 'EDITOR', 'Editor', 'editor'].includes(role.name)
+  );
+
+  // Redirect to 404 if not authenticated or not admin/editor
+  if (!isAuthenticated || !hasEditorAccess) {
+    return <Navigate to="/404" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 export default PrivateRoute;

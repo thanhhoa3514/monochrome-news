@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./lib/language-context";
 import { AuthProvider } from "./contexts/AuthContext";
-import { PrivateRoute, AdminRoute } from "./components/PrivateRoute";
+import { PrivateRoute, AdminRoute, EditorRoute } from "./components/PrivateRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -51,7 +51,8 @@ const App = () => (
               <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/:tab" element={<AdminRoute><Admin /></AdminRoute>} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/editor" element={<AdminRoute><Editor /></AdminRoute>} />
+              <Route path="/editor" element={<EditorRoute><Editor /></EditorRoute>} />
+              <Route path="/editor/:tab" element={<EditorRoute><Editor /></EditorRoute>} />
               <Route path="/search" element={<Search />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/pricing" element={<PricingPage />} />

@@ -2,7 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Eye, CheckCircle, FileEdit } from 'lucide-react';
 
-const EditorDashboard = () => {
+interface EditorDashboardProps {
+    onNavigate?: (tab: string) => void;
+}
+
+const EditorDashboard = ({ onNavigate }: EditorDashboardProps) => {
     // Editor-specific stats (limited compared to Admin)
     const stats = {
         myArticles: 24, // Mock: articles created by this editor
@@ -77,14 +81,27 @@ const EditorDashboard = () => {
                     <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div
+                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => onNavigate?.('articles')}
+                        >
                             <h3 className="font-semibold mb-2">📝 Create New Article</h3>
                             <p className="text-sm text-muted-foreground">Start writing a new article from scratch</p>
                         </div>
-                        <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                        <div
+                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => onNavigate?.('ai-articles')}
+                        >
                             <h3 className="font-semibold mb-2">✨ AI Generator</h3>
                             <p className="text-sm text-muted-foreground">Generate content using AI assistance</p>
+                        </div>
+                        <div
+                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => onNavigate?.('tags')}
+                        >
+                            <h3 className="font-semibold mb-2">🏷️ Manage Tags</h3>
+                            <p className="text-sm text-muted-foreground">Create and organize content tags</p>
                         </div>
                     </div>
                 </CardContent>
