@@ -58,12 +58,17 @@ export default function Register() {
         password_confirmation: confirmPassword
       });
 
-      setOtpExpiresIn(response.expires_in || 300);
-      setStep('verify');
+      // OTP disabled - go directly to success
+      setStep('success');
       toast({
         title: "Đăng ký thành công",
-        description: response.message,
+        description: response.message || "Bạn có thể đăng nhập ngay!",
       });
+
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error: any) {
       toast({
         title: "Lỗi đăng ký",
