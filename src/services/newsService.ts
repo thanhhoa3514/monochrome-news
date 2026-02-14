@@ -7,7 +7,10 @@ import {
 import { API_URL } from "@/config/environment";
 import { CreateNewsInput } from "@/types/news";
 import { AdminNewsQueryParams } from "@/types/news";
+import { getAuthHeaders, getAuthHeadersWithJson } from "./apiHelper";
+
 const API_BASE_URL = `${API_URL}/api/v1`;
+
 export const newsService = {
   /**
    * Get news
@@ -175,10 +178,7 @@ export const newsService = {
   }): Promise<{ data: any[]; generation_id?: string }> {
     const response = await fetch(`${API_BASE_URL}/news/ai-generate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: getAuthHeadersWithJson(),
       credentials: "include",
       body: JSON.stringify(params),
     });
@@ -198,9 +198,7 @@ export const newsService = {
   async deleteNews(id: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/news/${id}`, {
       method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
+      headers: getAuthHeaders(),
       credentials: "include",
     });
 
@@ -215,17 +213,19 @@ export const newsService = {
    */
   async createNews(news: CreateNewsInput | FormData): Promise<News> {
     const isFormData = news instanceof FormData;
+    const token = localStorage.getItem('auth_token');
+
+    const headers: Record<string, string> = isFormData
+      ? { Accept: "application/json" }
+      : { "Content-Type": "application/json", Accept: "application/json" };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const response = await fetch(`${API_BASE_URL}/news`, {
       method: "POST",
-      headers: isFormData
-        ? {
-            Accept: "application/json",
-          }
-        : {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
+      headers,
       credentials: "include",
       body: isFormData ? news : JSON.stringify(news),
     });
@@ -248,6 +248,7 @@ export const newsService = {
     news: CreateNewsInput | FormData
   ): Promise<News> {
     const isFormData = news instanceof FormData;
+    const token = localStorage.getItem('auth_token');
 
     // For FormData with file uploads in Laravel, we must use POST with _method=PUT
     // because PHP doesn't parse multipart/form-data on PUT requests natively
@@ -257,16 +258,17 @@ export const newsService = {
       news.append("_method", "PUT");
     }
 
+    const headers: Record<string, string> = isFormData
+      ? { Accept: "application/json" }
+      : { "Content-Type": "application/json", Accept: "application/json" };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/news/${id}`, {
       method: method,
-      headers: isFormData
-        ? {
-            Accept: "application/json",
-          }
-        : {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
+      headers,
       credentials: "include",
       body: isFormData ? news : JSON.stringify(news),
     });

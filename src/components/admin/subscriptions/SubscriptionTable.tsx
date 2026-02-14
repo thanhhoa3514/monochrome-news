@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Undo } from "lucide-react";
-import { Subscription } from '@/services/subscriptionService';
+import { Subscription } from '@/types/subscription';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 interface SubscriptionTableProps {
@@ -117,7 +117,7 @@ const SubscriptionTable = ({
                                     <TableCell>{getSubscriptionStatusBadge(subscription.status)}</TableCell>
                                     <TableCell>
                                         <span className="font-medium">
-                                            {subscription.plan?.currency} ${subscription.plan?.price.toFixed(2)}
+                                            {(Number(subscription.plan?.price) || 0).toFixed(2)}
                                         </span>
                                     </TableCell>
                                     <TableCell>{new Date(subscription.start_date).toLocaleDateString()}</TableCell>

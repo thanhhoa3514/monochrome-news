@@ -46,9 +46,11 @@ const AdminAIArticles = () => {
     const fetchHistory = async () => {
         setIsLoadingHistory(true);
         try {
+            const token = localStorage.getItem('auth_token');
             const response = await fetch(`${API_URL}/api/v1/ai-generations`, {
                 headers: {
                     'Accept': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 credentials: 'include'
             });
@@ -155,11 +157,13 @@ const AdminAIArticles = () => {
         }
 
         try {
+            const token = localStorage.getItem('auth_token');
             const response = await fetch(`${API_URL}/api/v1/news/publish-ai`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 credentials: 'include',
                 body: JSON.stringify({

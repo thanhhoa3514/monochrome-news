@@ -11,6 +11,7 @@ const AuthCallback = () => {
 
     useEffect(() => {
         const userParam = searchParams.get('user');
+        const tokenParam = searchParams.get('token');
         const errorParam = searchParams.get('error');
 
         if (errorParam) {
@@ -22,10 +23,15 @@ const AuthCallback = () => {
         if (userParam) {
             try {
                 const user = JSON.parse(decodeURIComponent(userParam));
+
+                // Store token in localStorage if provided (for cross-origin auth)
+                if (tokenParam) {
+                    localStorage.setItem('auth_token', tokenParam);
+                }
+
                 login(user);
                 navigate('/');
             } catch (err) {
-                console.error('Failed to parse user data:', err);
                 setError('Failed to process authentication. Please try again.');
                 setTimeout(() => navigate('/login'), 3000);
             }

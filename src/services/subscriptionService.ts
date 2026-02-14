@@ -30,10 +30,12 @@ const subscriptionService = {
     },
 
     cancel: async (id: number) => {
+        const token = localStorage.getItem('auth_token');
         const response = await fetch(`${API_BASE_URL}/subscriptions/${id}/cancel`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
             credentials: 'include'
         });
@@ -46,10 +48,12 @@ const subscriptionService = {
     },
 
     activate: async (id: number) => {
+        const token = localStorage.getItem('auth_token');
         const response = await fetch(`${API_BASE_URL}/subscriptions/${id}/activate`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             },
             credentials: 'include'
         });
@@ -64,9 +68,11 @@ const subscriptionService = {
     // Get current user's active subscription
     getCurrentSubscription: async (): Promise<Subscription | null> => {
         try {
+            const token = localStorage.getItem('auth_token');
             const response = await fetch(`${API_BASE_URL}/subscriptions?status=active&per_page=1`, {
                 headers: {
                     'Accept': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 },
                 credentials: 'include'
             });

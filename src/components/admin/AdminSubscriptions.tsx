@@ -46,7 +46,7 @@ const AdminSubscriptions = () => {
         activeSubscriptions: subscriptions.filter(s => s.status === 'active').length,
         mrr: subscriptions
             .filter(s => s.status === 'active' && s.plan)
-            .reduce((sum, s) => sum + (s.plan?.price || 0), 0)
+            .reduce((sum, s) => sum + (Number(s.plan?.price) || 0), 0)
     };
 
     // Mutations
@@ -149,7 +149,7 @@ const AdminSubscriptions = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `$${stats.mrr.toFixed(2)}`}
+                            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `$${(Number(stats.mrr) || 0).toFixed(2)}`}
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Estimated from active subscriptions on current page

@@ -51,9 +51,6 @@ export const authService = {
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const loginUrl = `${API_BASE_URL}/auth/login`;
-    console.log('[AuthService] Login URL:', loginUrl);
-    console.log('[AuthService] Credentials:', { email: credentials.email, password: '***' });
-
     const response = await fetch(loginUrl, {
       method: "POST",
       headers: {
@@ -64,14 +61,17 @@ export const authService = {
       credentials: "include",
     });
 
-    console.log('[AuthService] Response status:', response.status);
-    console.log('[AuthService] Response headers:', Object.fromEntries(response.headers.entries()));
 
     const result = await response.json();
-    console.log('[AuthService] Response body:', result);
+
 
     if (!response.ok) {
       throw new Error(result.message || "Login failed");
+    }
+
+    // Store token in localStorage for cross-origin requests
+    if (result.token) {
+      localStorage.setItem('auth_token', result.token);
     }
 
     return result;
@@ -118,15 +118,25 @@ export const authService = {
   },
 
   async me() {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
       credentials: "include",
     });
 
     if (response.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('auth_token');
       return null;
     }
 
@@ -140,11 +150,17 @@ export const authService = {
   },
 
   async updateProfile(data: FormData) {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
+      headers,
       body: data,
       credentials: "include",
     });
@@ -163,12 +179,18 @@ export const authService = {
     newPassword: string,
     newPasswordConfirmation: string
   ) {
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify({
         current_password: currentPassword,
         new_password: newPassword,

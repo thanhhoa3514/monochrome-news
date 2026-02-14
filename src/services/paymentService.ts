@@ -1,4 +1,5 @@
 import { API_URL } from '@/config/environment';
+import { getAuthHeadersWithJson } from './apiHelper';
 
 export interface CheckoutSessionResponse {
     checkoutUrl: string;
@@ -10,10 +11,7 @@ export const paymentService = {
     createCheckoutSession: async (planId: number): Promise<CheckoutSessionResponse> => {
         const response = await fetch(`${API_URL}/api/v1/subscriptions/create-checkout-session`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: getAuthHeadersWithJson(),
             credentials: 'include',
             body: JSON.stringify({ plan_id: planId }),
         });

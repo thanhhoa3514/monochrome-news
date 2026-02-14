@@ -85,8 +85,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="font-serif font-bold text-2xl">
-              NewsPortal
+            <Link to="/" className="flex items-center gap-2 font-serif font-bold text-2xl">
+              <img src="/favicon.svg" alt="NewsPortal Logo" className="h-8 w-8" />
+              <span className="hidden sm:inline">NewsPortal</span>
             </Link>
           </div>
 
