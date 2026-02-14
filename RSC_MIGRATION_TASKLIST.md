@@ -105,10 +105,14 @@ Status owner: Codex + User
 - 2026-02-14: Added `BASELINE_SMOKE_CHECKLIST.md` for pre-migration route and auth verification.
 - 2026-02-14: Implemented Phase 2 data-layer split in `next-app` (`lib/server-api.ts`, `lib/client-api.ts`, shared `lib/api/news.ts` + server/client news services).
 - 2026-02-14: Verified no `localStorage` or browser-global usage in new `next-app` API layer and verified server-only imports are isolated to `server-api.ts`.
+- 2026-02-14: Created `phase-03-public-routes-rsc` branch from migration branch and implemented Phase 3 route files (`/`, `/news/[id]`, `/category/[slug]`, `/tag/[slug]`) in `next-app/app`.
+- 2026-02-14: Added reusable server-rendered news UI components in `next-app/components/news`.
+- 2026-02-14: TypeScript verification passed in `next-app` via `npx tsc --noEmit`; runtime route verification remains pending.
 
 ## Notes
 
 - Keep admin/editor/payment flows as client components until public content migration is stable.
 - Prefer server components by default; add client boundary only for hooks/events/browser APIs.
 - Prioritize incremental PRs per phase to reduce rollback risk.
-- Blocker: `next-app` dependency install is not completing in this environment yet, so Phase 1 verification (`npm run dev`/`npm run build`) is pending and must remain unchecked.
+- Blocker: in this sandbox, `npm run dev` cannot bind local ports (`listen EPERM`) and `npm run build` fails with a generic webpack banner without expanded diagnostics; runtime/manual verification must be performed locally before checking remaining Phase 1/3 boxes.
+- Blocker: `npm run dev` cannot bind a port in this sandbox (`listen EPERM`), and `npm run build` currently fails with generic webpack banner without detailed diagnostics in this environment; manual local verification is required before checking Phase 3 boxes.

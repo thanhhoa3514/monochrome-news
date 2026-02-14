@@ -3,6 +3,8 @@
   --foreground: #111111;
   --muted: #f2f2f2;
   --border: #e5e5e5;
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: Georgia, "Times New Roman", Times, serif;
 }
 
 * {
