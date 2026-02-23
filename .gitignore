@@ -25,3 +25,4 @@ dist-ssr
 .cursor/rules/user-rule.mdc
 *.md
 .env
+package-lock.json
