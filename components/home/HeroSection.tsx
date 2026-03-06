@@ -1,10 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { News } from '@/types/news';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
+import Image from 'next/image';
 interface HeroSectionProps {
     articles: News[];
 }
@@ -20,12 +20,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ articles }) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Hero Article (2/3 width) */}
                 <div className="lg:col-span-2 group cursor-pointer">
-                    <Link to={`/news/${mainArticle.id}`}>
+                    <Link href={`/news/${mainArticle.id}`}>
                         <div className="relative overflow-hidden rounded-xl aspect-[16/9] mb-4">
-                            <img
+                            <Image
                                 src={mainArticle.thumbnail || 'https://placehold.co/800x450?text=News'}
                                 alt={mainArticle.title}
                                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                width={800}
+                                height={450}
                             />
                             <div className="absolute top-4 left-4">
                                 <Badge className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -54,12 +56,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ articles }) => {
                 {/* Side Articles (1/3 width) */}
                 <div className="flex flex-col gap-6">
                     {sideArticles.map((article) => (
-                        <Link key={article.id} to={`/news/${article.id}`} className="group flex flex-col h-full">
+                        <Link key={article.id} href={`/news/${article.id}`} className="group flex flex-col h-full">
                             <div className="relative overflow-hidden rounded-lg aspect-[3/2] mb-3">
-                                <img
+                                <Image
                                     src={article.thumbnail || 'https://placehold.co/400x300?text=News'}
                                     alt={article.title}
                                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                    width={400}
+                                    height={300}
                                 />
                                 <div className="absolute top-2 left-2">
                                     <Badge variant="secondary" className="text-xs backdrop-blur-md bg-background/80">

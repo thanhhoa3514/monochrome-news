@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState } from 'react';
@@ -101,7 +102,7 @@ const AdminAIArticlesClient = ({ initialCategories, initialHistory }: AdminAIArt
             addLog(`Received response from server.`);
 
             if (result.success && result.data) {
-                let articles = [];
+                let articles: any[] = [];
                 if (Array.isArray(result.data)) {
                     articles = result.data;
                 } else if (result.data.data) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import FormModal from "./FormModal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -229,10 +230,13 @@ const AddEditArticleModal = ({ isOpen, onClose, onSuccess, initialData, categori
           />
           {thumbnailPreview && (
             <div className="mt-2">
-              <img
+              <Image
                 src={thumbnailPreview}
                 alt="Thumbnail preview"
+                width={200}
+                height={128}
                 className="h-32 w-auto object-cover rounded border"
+                unoptimized
               />
             </div>
           )}

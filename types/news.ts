@@ -88,3 +88,13 @@ export interface EditorStats {
     published: number;
     drafts: number;
 }
+export interface AiGeneration {
+    id: number;
+    user_id: number;
+    category: string;
+    prompt: string | null;
+    generated_content: string[];
+    status: string;
+    created_at: string;
+    updated_at: string;
+}

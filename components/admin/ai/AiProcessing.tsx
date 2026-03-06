@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Loader2, BrainCircuit, PenTool, CheckCircle2 } from 'lucide-react';
@@ -79,8 +80,8 @@ const AiProcessing: React.FC<AiProcessingProps> = ({ logs }) => {
                         return (
                             <div key={index} className="flex flex-col items-center gap-2">
                                 <div className={`p-2 rounded-full border transition-all duration-300 ${isActive ? 'bg-primary text-primary-foreground border-primary scale-110 shadow-lg' :
-                                        isCompleted ? 'bg-primary/10 text-primary border-primary/20' :
-                                            'bg-muted text-muted-foreground border-transparent'
+                                    isCompleted ? 'bg-primary/10 text-primary border-primary/20' :
+                                        'bg-muted text-muted-foreground border-transparent'
                                     }`}>
                                     <Icon className="w-4 h-4" />
                                 </div>

@@ -52,7 +52,7 @@ interface CategoryListClientProps {
 
 export default function CategoryListClient({ initialCategories }: CategoryListClientProps) {
     const { t } = useLanguage();
-    const [categories, setCategories] = useState<Category[]>(initialCategories);
+    const [categories] = useState<Category[]>(initialCategories);
 
     useEffect(() => {
         // If we already have initialCategories from the server, we don't strictly need to refetch

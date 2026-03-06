@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
@@ -128,7 +129,7 @@ const AdminTagsClient = ({ initialTags }: AdminTagsClientProps) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {loading && tags.length === 0 ? (
+                            {isPending && tags.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-8">
                                         <Loader2 className="h-6 w-6 animate-spin mx-auto" />

@@ -35,8 +35,8 @@ export async function loginAction(credentials: LoginCredentials): Promise<{ succ
         }
 
         return { success: false, error: "Token missing from response" };
-    } catch (error: any) {
-        return { success: false, error: error.message || "An unexpected error occurred" };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" };
     }
 }
 
