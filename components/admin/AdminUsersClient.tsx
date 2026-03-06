@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useTransition } from 'react';
@@ -117,7 +118,7 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
         );
     };
 
-    if (loading && users.length === 0) {
+    if (users.length === 0) {
         return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
     }
 
@@ -214,7 +215,7 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
                 isOpen={isAddEditModalOpen}
                 onClose={() => setIsAddEditModalOpen(false)}
                 onSuccess={() => {
-                    fetchUsers();
+                    refreshUsers();
                     setIsAddEditModalOpen(false);
                 }}
                 user={userToEdit}

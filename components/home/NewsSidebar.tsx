@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { News } from '@/types/news';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +29,7 @@ const NewsSidebar: React.FC<NewsSidebarProps> = ({ trendingArticles }) => {
                     {trendingArticles.map((article, index) => (
                         <Link
                             key={article.id}
-                            to={`/news/${article.id}`}
+                            href={`/news/${article.id}`}
                             className="group flex items-start gap-4"
                         >
                             <span className="text-3xl font-bold text-muted-foreground/20 font-serif -mt-2 group-hover:text-primary/40 transition-colors">

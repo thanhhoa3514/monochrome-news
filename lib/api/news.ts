@@ -1,5 +1,5 @@
 import type { ApiClient } from "@/lib/api/types";
-import { CreateNewsInput } from "@/types/news";
+import { AiGeneration, CreateNewsInput } from "@/types/news";
 
 export interface NewsCategory {
   id: number;
@@ -80,7 +80,7 @@ export function createNewsApi(client: ApiClient) {
     getLatestNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=6")).data,
     getPopularNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=4")).data,
     getEditorStats: () => client.request<EditorStats>("/editor/stats"),
-    getAiGenerations: () => client.request<{ data: any[] }>("/ai-generations"),
+    getAiGenerations: () => client.request<{ data: AiGeneration[] }>("/ai-generations"),
 
     deleteNews: (id: number) =>
       client.request<void>(`/news/${id}`, { method: "DELETE" }),
@@ -104,6 +104,6 @@ export function createNewsApi(client: ApiClient) {
       tone: string;
       length: string;
       prompt?: string;
-    }) => client.request<{ data: any[]; generation_id?: string }>(`/news/ai-generate`, { method: "POST", body: params }),
+    }) => client.request<{ data: AiGeneration[]; generation_id?: string }>(`/news/ai-generate`, { method: "POST", body: params }),
   };
 }

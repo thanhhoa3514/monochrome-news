@@ -58,7 +58,7 @@ export default async function TagPage({
         </div>
       </section>
     );
-  } catch (error) {
+  } catch {
     return (
       <EmptyState
         title="Unable to load tag"

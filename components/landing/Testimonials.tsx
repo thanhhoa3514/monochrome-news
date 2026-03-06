@@ -51,7 +51,7 @@ const TestimonialCard = memo(({ testimonial, index }: { testimonial: typeof test
                 </div>
 
                 <p className="text-muted-foreground mb-6 leading-relaxed italic">
-                    "{testimonial.content}"
+                    &ldquo;{testimonial.content}&rdquo;
                 </p>
 
                 <div className="flex items-center gap-3">

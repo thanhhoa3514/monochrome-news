@@ -195,9 +195,9 @@ const AddEditUserModal = ({ isOpen, onClose, onSuccess, user, roles }: AddEditUs
                   className="text-sm font-normal cursor-pointer"
                 >
                   {role.name}
-                  {(role as any).description && (
+                  {role.description && (
                     <span className="text-xs text-muted-foreground ml-2">
-                      ({(role as any).description})
+                      ({role.description})
                     </span>
                   )}
                 </Label>

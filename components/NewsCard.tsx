@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
 import { motion } from 'framer-motion';
 import { useLanguage } from "@/lib/language-context";
@@ -43,7 +43,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
     >
       {/* Image */}
       <div className={`overflow-hidden rounded-lg ${featured ? 'h-64 lg:h-full' : 'h-48 md:h-56'}`}>
-        <Link to={`/news/${news.id}`}>
+        <Link href={`/news/${news.id}`}>
           <motion.img
             src={news.thumbnail || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070'}
             alt={news.title}
@@ -66,7 +66,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
           <span className="text-sm text-muted-foreground">{calculateReadTime(news.content)}</span>
         </div>
 
-        <Link to={`/news/${news.id}`}>
+        <Link href={`/news/${news.id}`}>
           <motion.h2
             className={`font-serif font-bold ${featured ? 'text-2xl md:text-3xl' : 'text-xl'} mb-2 group-hover:text-actionRed transition-colors`}
             whileHover={{ x: 5 }}
@@ -83,7 +83,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
           transition={{ duration: 0.2 }}
         >
           <Link
-            to={`/news/${news.id}`}
+            href={`/news/${news.id}`}
             className="inline-block mt-4 text-actionRed font-medium hover:underline"
           >
             {t('read.more')}

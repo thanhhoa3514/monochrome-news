@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,7 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
-    const navigate = useNavigate();
+    const navigate = useRouter();
     const { user, logout } = useAuth();
 
     const getTabName = (tab: string) => {
@@ -48,7 +48,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
 
     const handleLogout = async () => {
         await logout();
-        navigate('/login');
+        navigate.push('/login');
     };
 
     return (
@@ -114,11 +114,11 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/admin/profile')}>
+                        <DropdownMenuItem onClick={() => navigate.push('/admin/profile')}>
                             <User className="mr-2 h-4 w-4" />
                             <span>Profile</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
+                        <DropdownMenuItem onClick={() => navigate.push('/admin/settings')}>
                             <Settings className="mr-2 h-4 w-4" />
                             <span>Settings</span>
                         </DropdownMenuItem>

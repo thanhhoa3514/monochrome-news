@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,7 +60,7 @@ const AdminArticleDetailModal: React.FC<AdminArticleDetailModalProps> = ({ isOpe
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
-                                <span>Published: {formatDate(article.published_at)}</span>
+                                <span>Published: {formatDate(article.published_at || '')}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Clock className="w-4 h-4" />
@@ -74,10 +75,11 @@ const AdminArticleDetailModal: React.FC<AdminArticleDetailModalProps> = ({ isOpe
                         {/* Thumbnail */}
                         {article.thumbnail && (
                             <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                                <img
+                                <Image
                                     src={article.thumbnail}
                                     alt={article.title}
-                                    className="object-cover w-full h-full"
+                                    fill
+                                    className="object-cover"
                                 />
                             </div>
                         )}

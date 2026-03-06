@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -105,7 +105,7 @@ const PricingCard = memo(({ plan, index }: { plan: typeof plans[0], index: numbe
                     size="lg"
                     asChild
                 >
-                    <Link to="/pricing">
+                    <Link href="/pricing">
                         {plan.cta}
                     </Link>
                 </Button>
