@@ -52,7 +52,7 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
         </article>
       </section>
     );
-  } catch (error) {
+  } catch {
     return (
       <EmptyState
         title="Unable to load article"

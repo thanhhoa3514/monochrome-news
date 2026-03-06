@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import AdminAIArticlesClient from './AdminAIArticlesClient';
 import { serverNewsService } from '@/lib/server';

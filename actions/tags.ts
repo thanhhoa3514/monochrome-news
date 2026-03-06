@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { serverApiClient } from "@/lib/server-api";
 import { createTagApi } from "@/lib/api/tags";
+import { CreateTagInput, UpdateTagInput } from "@/types/tag";
 
 const tagsApi = createTagApi(serverApiClient);
 
-export async function createTagAction(data: { name: string; slug: string; description?: string; color?: string }) {
+export async function createTagAction(data: CreateTagInput) {
     try {
         const result = await tagsApi.createTag(data);
         revalidatePath("/admin");
@@ -17,7 +18,7 @@ export async function createTagAction(data: { name: string; slug: string; descri
     }
 }
 
-export async function updateTagAction(id: number, data: { name?: string; slug?: string; description?: string; color?: string }) {
+export async function updateTagAction(id: number, data: UpdateTagInput) {
     try {
         const result = await tagsApi.updateTag(id, data);
         revalidatePath("/admin");

@@ -1,5 +1,4 @@
-
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useLanguage } from "@/lib/language-context";
 
 export default function Footer() {
@@ -25,21 +24,21 @@ export default function Footer() {
           <div>
             <h3 className="font-serif font-bold text-lg mb-4">{t('footer.categories')}</h3>
             <ul className="space-y-2">
-              <li><Link to="/category/politique" className="hover:text-actionRed transition-colors">{t('nav.politique')}</Link></li>
-              <li><Link to="/category/economie" className="hover:text-actionRed transition-colors">{t('nav.economie')}</Link></li>
-              <li><Link to="/category/tech" className="hover:text-actionRed transition-colors">{t('nav.tech')}</Link></li>
-              <li><Link to="/category/sport" className="hover:text-actionRed transition-colors">{t('nav.sport')}</Link></li>
-              <li><Link to="/category/culture" className="hover:text-actionRed transition-colors">{t('nav.culture')}</Link></li>
+              <li><Link href="/category/politique" className="hover:text-actionRed transition-colors">{t('nav.politique')}</Link></li>
+              <li><Link href="/category/economie" className="hover:text-actionRed transition-colors">{t('nav.economie')}</Link></li>
+              <li><Link href="/category/tech" className="hover:text-actionRed transition-colors">{t('nav.tech')}</Link></li>
+              <li><Link href="/category/sport" className="hover:text-actionRed transition-colors">{t('nav.sport')}</Link></li>
+              <li><Link href="/category/culture" className="hover:text-actionRed transition-colors">{t('nav.culture')}</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-serif font-bold text-lg mb-4">{t('footer.useful.links')}</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="hover:text-actionRed transition-colors">{t('footer.about.link')}</Link></li>
-              <li><Link to="/contact" className="hover:text-actionRed transition-colors">{t('footer.contact')}</Link></li>
-              <li><Link to="/privacy" className="hover:text-actionRed transition-colors">{t('footer.privacy')}</Link></li>
-              <li><Link to="/terms" className="hover:text-actionRed transition-colors">{t('footer.terms')}</Link></li>
+              <li><Link href="/about" className="hover:text-actionRed transition-colors">{t('footer.about.link')}</Link></li>
+              <li><Link href="/contact" className="hover:text-actionRed transition-colors">{t('footer.contact')}</Link></li>
+              <li><Link href="/privacy" className="hover:text-actionRed transition-colors">{t('footer.privacy')}</Link></li>
+              <li><Link href="/terms" className="hover:text-actionRed transition-colors">{t('footer.terms')}</Link></li>
             </ul>
           </div>
 
@@ -49,9 +48,9 @@ export default function Footer() {
               {t('footer.newsletter.desc')}
             </p>
             <div className="flex">
-              <input 
-                type="email" 
-                placeholder={t('footer.newsletter.placeholder')} 
+              <input
+                type="email"
+                placeholder={t('footer.newsletter.placeholder')}
                 className="px-4 py-2 border rounded-l-md w-full focus:outline-none focus:ring-2 focus:ring-actionRed"
               />
               <button className="bg-actionRed text-white px-4 py-2 rounded-r-md hover:bg-actionRed-hover transition-colors">

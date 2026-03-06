@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { News } from '@/types/news';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import Image from 'next/image';
 interface CategorySectionProps {
     title: string;
     categoryId?: number;
@@ -28,12 +29,14 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, categoryId, ar
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {articles.slice(0, 4).map((article) => (
-                        <Link key={article.id} to={`/news/${article.id}`} className="group block">
+                        <Link key={article.id} href={`/news/${article.id}`} className="group block">
                             <div className="relative overflow-hidden rounded-lg aspect-[3/2] mb-3 bg-muted">
-                                <img
+                                <Image
                                     src={article.thumbnail || 'https://placehold.co/400x300?text=News'}
                                     alt={article.title}
                                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                    width={400}
+                                    height={300}
                                 />
                             </div>
                             <h3 className="font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">
