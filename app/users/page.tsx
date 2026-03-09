@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import { UserListItem } from '@/types/user';
 
 export const metadata: Metadata = {
     title: 'User List | Teacher Demo',
@@ -8,8 +9,8 @@ export const metadata: Metadata = {
 
 // Mặc định Next.js App Router các file page.tsx sẽ là Server Component
 export default async function UsersDemoPage() {
-    let users = [];
-    let error = null;
+    let users: UserListItem[] = [];
+    let error: string | null = null;
 
     try {
         // Gọi trực tiếp đến /users (không dùng /api theo như cấu hình rút gọn lúc nãy)
@@ -85,7 +86,7 @@ export default async function UsersDemoPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
-                                    {users.map((user: any) => (
+                                    {users.map((user: UserListItem) => (
                                         <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                                 #{user.id}
