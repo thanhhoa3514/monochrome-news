@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     description: 'A simple page to display users for the backend API demo',
 };
 
+// Yêu cầu Next.js biến trang này thành Dynamic (SSR thực thụ) thay vì cố gắng build tĩnh (SSG)
+export const dynamic = 'force-dynamic';
+
 // Mặc định Next.js App Router các file page.tsx sẽ là Server Component
 export default async function UsersDemoPage() {
     let users: UserListItem[] = [];
@@ -14,9 +17,10 @@ export default async function UsersDemoPage() {
 
     try {
         // Gọi trực tiếp đến /users (không dùng /api theo như cấu hình rút gọn lúc nãy)
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        // Hỗ trợ biến môi trường dành riêng cho Demo endpoint (NEXT_PUBLIC_DEMO_API_URL)
+        const apiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL || (process.env.NEXT_PUBLIC_API_URL
             ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '')
-            : 'https://backend-php-news-app.onrender.com';
+            : 'https://backend-php-news-app.onrender.com');
 
         const endpoint = `${apiUrl}/users`;
 
