@@ -55,7 +55,9 @@ function toQueryString(params: NewsQueryParams = {}): string {
 
 export function createNewsApi(client: ApiClient) {
   return {
-    getCategories: () => client.request<NewsCategory[]>("/categories"),
+    getCategories: () => client.request<NewsCategory[]>("/categories", { 
+      next: { revalidate: 3600 } 
+    }),
 
     getNews: (params: NewsQueryParams = {}) => {
       const endpoint = params.q ? "/news/search" : "/news";

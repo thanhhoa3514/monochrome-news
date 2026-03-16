@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { serverNewsService, serverAuthService } from "@/lib/server";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/lib/language-context";
 import AuthLink from "./AuthLink";
 
 const fallbackCategories = [
@@ -27,7 +28,8 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   const overflowCategories = categories.slice(10);
 
   return (
-    <AuthProvider initialUser={initialUser}>
+    <LanguageProvider>
+      <AuthProvider initialUser={initialUser}>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="container flex items-center justify-between py-4">
           <div className="flex items-center gap-8">
@@ -95,6 +97,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
           Monochrome News Flash. Fast updates across politics, business, technology, and culture.
         </div>
       </footer>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
