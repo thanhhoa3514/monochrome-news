@@ -64,23 +64,36 @@ export function createNewsApi(client: ApiClient) {
       const query = toQueryString(params);
       return client.request<PaginatedResponse<NewsItem>>(
         query ? `${endpoint}?${query}` : endpoint,
+        { next: { revalidate: 300 } },
       );
     },
 
-    getNewsById: (id: number | string) => client.request<NewsItem>(`/news/${id}`),
+    getNewsById: (id: number | string) => client.request<NewsItem>(`/news/${id}`, {
+      next: { revalidate: 300 },
+    }),
 
     getNewsByCategorySlug: (slug: string, page = 1) =>
-      client.request<PaginatedResponse<NewsItem>>(`/categories/${slug}/news?page=${page}`),
+      client.request<PaginatedResponse<NewsItem>>(`/categories/${slug}/news?page=${page}`, {
+        next: { revalidate: 300 },
+      }),
 
     getNewsByTag: (idOrSlug: string | number, page = 1) =>
       client.request<{
         tag: { id: number; name: string; slug: string; description?: string };
         news: PaginatedResponse<NewsItem>;
-      }>(`/tags/${idOrSlug}/news?page=${page}`),
+      }>(`/tags/${idOrSlug}/news?page=${page}`, {
+        next: { revalidate: 300 },
+      }),
 
-    getFeaturedNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=5")).data,
-    getLatestNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=6")).data,
-    getPopularNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=4")).data,
+    getFeaturedNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=5", {
+      next: { revalidate: 300 },
+    })).data,
+    getLatestNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=6", {
+      next: { revalidate: 300 },
+    })).data,
+    getPopularNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=4", {
+      next: { revalidate: 300 },
+    })).data,
     getEditorStats: () => client.request<EditorStats>("/editor/stats"),
     getAiGenerations: () => client.request<{ data: AiGeneration[] }>("/ai-generations"),
 

@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/news/empty-state";
 import { serverNewsService } from "@/lib/server";
 import type { NewsItem, PaginatedResponse, NewsCategory } from "@/lib/api/news";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache homepage for 5 minutes
 
 export const metadata: Metadata = {
   title: "Latest News and Top Stories",
