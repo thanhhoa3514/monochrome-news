@@ -11,7 +11,7 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(process.env.SITE_URL as string),
   title: {
     default: "Monochrome News Flash For Updating News and Information",
     template: "%s | Monochrome News Flash For Updating News and Information",
