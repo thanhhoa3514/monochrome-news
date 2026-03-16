@@ -7,8 +7,8 @@ export const metadata: Metadata = {
     description: 'A simple page to display users for the backend API demo',
 };
 
-// Yêu cầu Next.js biến trang này thành Dynamic (SSR thực thụ) thay vì cố gắng build tĩnh (SSG)
-export const dynamic = 'force-dynamic';
+// Cache trang trong 5 phút để tránh bị rate-limit (429) từ backend
+export const revalidate = 300;
 
 // Mặc định Next.js App Router các file page.tsx sẽ là Server Component
 export default async function UsersDemoPage() {
@@ -24,8 +24,8 @@ export default async function UsersDemoPage() {
 
         const endpoint = `${apiUrl}/users`;
 
-        // Yêu cầu Fetch không lưu cache, luôn lấy dữ liệu mới nhất (SSR)
-        const res = await fetch(endpoint, { cache: 'force-cache' });
+        // Sử dụng revalidate ở page-level, không cần set cache ở đây
+        const res = await fetch(endpoint, { next: { revalidate: 300 } });
 
         if (!res.ok) {
             throw new Error(`Failed to fetch data: ${res.status}`);
