@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { API_BASE_URL, API_PREFIX, AUTH_COOKIE_NAME } from "@/lib/api/config";
-import type { LoginCredentials, AuthResponse } from "@/types/auth/auth";
+import type { LoginCredentials, AuthResponse, RegisterData } from "@/types/auth/auth";
 
 export async function loginAction(credentials: LoginCredentials): Promise<{ success: boolean; user?: AuthResponse['user']; error?: string }> {
     const loginUrl = `${API_BASE_URL}${API_PREFIX}/auth/login`;
@@ -43,4 +43,40 @@ export async function loginAction(credentials: LoginCredentials): Promise<{ succ
 export async function logoutAction() {
     cookies().delete(AUTH_COOKIE_NAME);
     return { success: true };
+}
+
+export async function registerAction(data: RegisterData): Promise<{ success: boolean; user?: AuthResponse['user']; error?: string }> {
+    const registerUrl = `${API_BASE_URL}${API_PREFIX}/auth/register`;
+
+    try {
+        const response = await fetch(registerUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return { success: false, error: result.message || "Registration failed" };
+        }
+
+        if (result.token) {
+            cookies().set(AUTH_COOKIE_NAME, result.token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                path: "/",
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60, // 7 days
+            });
+            return { success: true, user: result.user };
+        }
+
+        return { success: false, error: "Registration successful but token missing" };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "An unexpected error occurred during registration" };
+    }
 }

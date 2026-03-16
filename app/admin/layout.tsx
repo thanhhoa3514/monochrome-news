@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { serverAuthService } from "@/lib/server";
 
+import AdminLayoutClient from "@/components/admin/AdminLayoutClient";
+
 export default async function AdminLayout({
     children,
 }: {
@@ -20,5 +22,5 @@ export default async function AdminLayout({
         redirect("/404");
     }
 
-    return <>{children}</>;
+    return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }

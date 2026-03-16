@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { serverNewsService, serverAuthService } from "@/lib/server";
 import { AuthProvider } from "@/contexts/AuthContext";
+import AuthLink from "./AuthLink";
 
 const fallbackCategories = [
   { name: "World", slug: "world" },
@@ -26,16 +27,19 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   const overflowCategories = categories.slice(10);
 
   return (
-    <>
+    <AuthProvider initialUser={initialUser}>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="container flex items-center justify-between py-4">
-          <Link href="/" className="font-serif text-2xl font-black tracking-tight">
-            MONOCHROME NEWS FLASH
-          </Link>
-          <nav aria-label="Quick links" className="hidden items-center gap-5 text-sm md:flex">
-            <Link href="/" className="hover:text-actionRed transition-colors">Top Stories</Link>
-            <Link href="/tag/ai" className="hover:text-actionRed transition-colors">AI</Link>
-          </nav>
+          <div className="flex items-center gap-8">
+            <Link href="/" className="font-serif text-2xl font-black tracking-tight">
+              MONOCHROME NEWS FLASH
+            </Link>
+            <nav aria-label="Quick links" className="hidden items-center gap-5 text-sm md:flex">
+              <Link href="/" className="hover:text-actionRed transition-colors">Top Stories</Link>
+              <Link href="/tag/ai" className="hover:text-actionRed transition-colors">AI</Link>
+            </nav>
+          </div>
+          <AuthLink />
         </div>
         <nav aria-label="News categories" className="border-y">
           <ul className="container flex items-center gap-5 overflow-x-auto py-3 text-sm font-medium whitespace-nowrap md:hidden">
@@ -85,14 +89,12 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
           </ul>
         </nav>
       </header>
-      <AuthProvider initialUser={initialUser}>
-        <main>{children}</main>
-        <footer className="border-t bg-muted/30">
-          <div className="container py-6 text-sm text-muted-foreground">
-            Monochrome News Flash. Fast updates across politics, business, technology, and culture.
-          </div>
-        </footer>
-      </AuthProvider>
-    </>
+      <main>{children}</main>
+      <footer className="border-t bg-muted/30">
+        <div className="container py-6 text-sm text-muted-foreground">
+          Monochrome News Flash. Fast updates across politics, business, technology, and culture.
+        </div>
+      </footer>
+    </AuthProvider>
   );
 }

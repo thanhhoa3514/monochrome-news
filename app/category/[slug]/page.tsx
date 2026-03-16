@@ -90,43 +90,73 @@ export default async function CategoryPage({
     };
 
     return (
-      <section className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <section className="container py-12">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 38, marginBottom: 8 }}>
-          {categoryName} News
-        </h1>
-        <p style={{ color: "#666", marginBottom: 20 }}>
-          Page {response.current_page} of {response.last_page}
-        </p>
+        
+        <header className="mb-12">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-actionRed mb-4 transition-all">
+            <span className="h-px w-8 bg-actionRed" />
+            Category
+          </div>
+          <h1 className="font-serif text-5xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
+            {categoryName}
+          </h1>
+          <div className="h-1.5 w-24 bg-foreground mb-8" />
+          <p className="text-muted-foreground font-medium flex items-center gap-2">
+            Showing Page <span className="text-foreground font-bold">{response.current_page}</span> of <span className="text-foreground font-bold">{response.last_page}</span>
+          </p>
+        </header>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {response.data.map((article) => (
             <NewsCardServer key={article.id} article={article} />
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-          {response.current_page > 1 ? (
-            <Link href={`/category/${params.slug}?page=${response.current_page - 1}`}>Previous</Link>
-          ) : (
-            <span style={{ color: "#999" }}>Previous</span>
-          )}
+        {response.last_page > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-16 pt-8 border-t border-border/40">
+            <Link 
+              href={`/category/${params.slug}?page=${response.current_page - 1}`}
+              className={`px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider transition-all
+                ${response.current_page > 1 
+                  ? "border-border hover:bg-foreground hover:text-background" 
+                  : "border-border/20 text-muted-foreground/40 pointer-events-none"}`}
+            >
+              Previous
+            </Link>
+            
+            <div className="flex items-center gap-2">
+              {Array.from({ length: Math.min(5, response.last_page) }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <Link
+                    key={pageNum}
+                    href={`/category/${params.slug}?page=${pageNum}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-all
+                      ${response.current_page === pageNum 
+                        ? "bg-actionRed text-white" 
+                        : "hover:bg-muted font-medium"}`}
+                  >
+                    {pageNum}
+                  </Link>
+                );
+              })}
+            </div>
 
-          {response.current_page < response.last_page ? (
-            <Link href={`/category/${params.slug}?page=${response.current_page + 1}`}>Next</Link>
-          ) : (
-            <span style={{ color: "#999" }}>Next</span>
-          )}
-        </div>
+            <Link 
+              href={`/category/${params.slug}?page=${response.current_page + 1}`}
+              className={`px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider transition-all
+                ${response.current_page < response.last_page 
+                  ? "border-border hover:bg-foreground hover:text-background" 
+                  : "border-border/20 text-muted-foreground/40 pointer-events-none"}`}
+            >
+              Next
+            </Link>
+          </div>
+        )}
       </section>
     );
   } catch {
