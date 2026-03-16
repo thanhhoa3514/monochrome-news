@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
 import { SiteShell } from "@/components/site-shell";
@@ -27,27 +27,49 @@ export const metadata: Metadata = {
     "sports news",
     "culture news",
   ],
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: ["/favicon.svg"],
+    apple: [
+      { url: "/favicon.svg", sizes: "180x180", type: "image/svg+xml" },
+    ],
+  },
   alternates: {
     canonical: "/",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   openGraph: {
-    title: "Monochrome News Flash For Updating News and Information",
-    description: "Breaking news, analysis, and live updates across major categories.",
+    title: "Monochrome News Flash | Fast Updates and Trusted Information",
+    description: "Breaking news, analysis, and live updates across politics, business, technology, sports, and culture.",
     type: "website",
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
-    siteName: "Monochrome News Flash For Updating News and Information",
+    url: "/",
+    siteName: "Monochrome News Flash",
+    locale: "vi_VN",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Monochrome News Flash For Updating News and Information",
+    title: "Monochrome News Flash | Fast Updates and Trusted Information",
     description: "Breaking news, analysis, and live updates across major categories.",
+    creator: "@monochromenews",
   },
 };
-
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: "#000000",
+}
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable} ${merriweather.variable}`} suppressHydrationWarning>

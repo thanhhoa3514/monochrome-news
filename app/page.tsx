@@ -22,14 +22,20 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const logError = (context: string) => (err: any) => {
+    console.error(`HomePage fetch error [${context}]:`, err);
+    return [];
+  };
+
   try {
     const [featuredArticles, latestArticles, popularArticles, categories] = await Promise.all([
-      serverNewsService.getFeaturedNews(),
-      serverNewsService.getLatestNews(),
-      serverNewsService.getPopularNews(),
-      serverNewsService.getCategories(),
+      serverNewsService.getFeaturedNews().catch(logError("featured")),
+      serverNewsService.getLatestNews().catch(logError("latest")),
+      serverNewsService.getPopularNews().catch(logError("popular")),
+      serverNewsService.getCategories().catch(logError("categories")),
     ]);
 
+    // If categories failed, we can't do the sub-fetches, so we use empty responses
     const techCategory = categories.find(
       (category) => category.slug === "technology" || category.name.toLowerCase().includes("tech"),
     );
@@ -39,15 +45,24 @@ export default async function HomePage() {
 
     const [techResponse, businessResponse] = await Promise.all([
       techCategory
-        ? serverNewsService.getNews({ category_id: techCategory.id, per_page: 4 })
+        ? serverNewsService.getNews({ category_id: techCategory.id, per_page: 4 }).catch(logError("tech"))
         : Promise.resolve({ data: [], current_page: 1, per_page: 4, total: 0, last_page: 1 }),
       businessCategory
-        ? serverNewsService.getNews({ category_id: businessCategory.id, per_page: 4 })
+        ? serverNewsService.getNews({ category_id: businessCategory.id, per_page: 4 }).catch(logError("business"))
         : Promise.resolve({ data: [], current_page: 1, per_page: 4, total: 0, last_page: 1 }),
     ]);
 
+    // Ensure techResponse and businessResponse follow Expected Shape if they failed and logError returned []
+    const safeTechData = Array.isArray(techResponse) ? techResponse : (techResponse as any).data || [];
+    const safeBusinessData = Array.isArray(businessResponse) ? businessResponse : (businessResponse as any).data || [];
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const topArticles = [...featuredArticles, ...latestArticles].slice(0, 8);
+
+    // If we have literally no news at all, show empty state instead of broken layout
+    if (topArticles.length === 0 && safeTechData.length === 0 && safeBusinessData.length === 0) {
+      throw new Error("No news data available from any source");
+    }
 
     const structuredData = {
       "@context": "https://schema.org",
@@ -110,11 +125,12 @@ export default async function HomePage() {
         <NewsGridSection title="Featured News" articles={featuredArticles} />
         <NewsGridSection title="Latest News" articles={latestArticles} />
         <NewsGridSection title="Popular News" articles={popularArticles} />
-        <NewsGridSection title="Technology" articles={techResponse.data} />
-        <NewsGridSection title="Business" articles={businessResponse.data} />
+        <NewsGridSection title="Technology" articles={safeTechData} />
+        <NewsGridSection title="Business" articles={safeBusinessData} />
       </>
     );
-  } catch {
+  } catch (e) {
+    console.error("HomePage data fetch error:", e);
     return (
       <EmptyState
         title="Unable to load homepage"
