@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NewsGridSection } from "@/components/news/news-grid-section";
 import { EmptyState } from "@/components/news/empty-state";
 import { serverNewsService } from "@/lib/server";
+import type { NewsItem, PaginatedResponse, NewsCategory } from "@/lib/api/news";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +23,9 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const logError = (context: string) => (err: any) => {
+  const logError = (context: string) => (err: unknown) => {
     console.error(`HomePage fetch error [${context}]:`, err);
-    return [];
+    return [] as NewsItem[];
   };
 
   try {
@@ -32,29 +33,29 @@ export default async function HomePage() {
       serverNewsService.getFeaturedNews().catch(logError("featured")),
       serverNewsService.getLatestNews().catch(logError("latest")),
       serverNewsService.getPopularNews().catch(logError("popular")),
-      serverNewsService.getCategories().catch(logError("categories")),
+      serverNewsService.getCategories().catch(() => [] as NewsCategory[]),
     ]);
 
     // If categories failed, we can't do the sub-fetches, so we use empty responses
     const techCategory = categories.find(
-      (category) => category.slug === "technology" || category.name.toLowerCase().includes("tech"),
+      (category: NewsCategory) => category.slug === "technology" || category.name.toLowerCase().includes("tech"),
     );
     const businessCategory = categories.find(
-      (category) => category.slug === "business" || category.name.toLowerCase().includes("business"),
+      (category: NewsCategory) => category.slug === "business" || category.name.toLowerCase().includes("business"),
     );
 
     const [techResponse, businessResponse] = await Promise.all([
       techCategory
-        ? serverNewsService.getNews({ category_id: techCategory.id, per_page: 4 }).catch(logError("tech"))
-        : Promise.resolve({ data: [], current_page: 1, per_page: 4, total: 0, last_page: 1 }),
+        ? serverNewsService.getNews({ category_id: techCategory.id, per_page: 4 }).catch(() => [] as NewsItem[])
+        : Promise.resolve({ data: [] as NewsItem[] }),
       businessCategory
-        ? serverNewsService.getNews({ category_id: businessCategory.id, per_page: 4 }).catch(logError("business"))
-        : Promise.resolve({ data: [], current_page: 1, per_page: 4, total: 0, last_page: 1 }),
+        ? serverNewsService.getNews({ category_id: businessCategory.id, per_page: 4 }).catch(() => [] as NewsItem[])
+        : Promise.resolve({ data: [] as NewsItem[] }),
     ]);
 
-    // Ensure techResponse and businessResponse follow Expected Shape if they failed and logError returned []
-    const safeTechData = Array.isArray(techResponse) ? techResponse : (techResponse as any).data || [];
-    const safeBusinessData = Array.isArray(businessResponse) ? businessResponse : (businessResponse as any).data || [];
+    // Ensure techResponse and businessResponse follow Expected Shape
+    const safeTechData = Array.isArray(techResponse) ? techResponse : (techResponse as PaginatedResponse<NewsItem>).data || [];
+    const safeBusinessData = Array.isArray(businessResponse) ? businessResponse : (businessResponse as PaginatedResponse<NewsItem>).data || [];
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const topArticles = [...featuredArticles, ...latestArticles].slice(0, 8);
