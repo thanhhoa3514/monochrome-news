@@ -25,7 +25,7 @@ export default async function UsersDemoPage() {
         const endpoint = `${apiUrl}/users`;
 
         // Yêu cầu Fetch không lưu cache, luôn lấy dữ liệu mới nhất (SSR)
-        const res = await fetch(endpoint, { cache: 'no-store' });
+        const res = await fetch(endpoint, { cache: 'force-cache' });
 
         if (!res.ok) {
             throw new Error(`Failed to fetch data: ${res.status}`);
