@@ -30,8 +30,11 @@ export const serverApiClient: ApiClient = {
       headers: requestHeaders,
       body,
       credentials: options.credentials ?? "include",
-      cache: options.cache ?? "no-store",
-      next: options.next,
+      // If revalidate is specified, we must NOT set cache: 'no-store'
+      ...(options.next?.revalidate !== undefined 
+        ? { next: options.next } 
+        : { cache: options.cache ?? "no-store", next: options.next }
+      ),
     });
 
     return unwrapOrThrow<T>(response);
