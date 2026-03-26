@@ -3,7 +3,6 @@ import Link from "next/link";
 import { EmptyState } from "@/components/news/empty-state";
 import { NewsCardServer } from "@/components/news/news-card-server";
 import { serverNewsService } from "@/lib/server";
-import { SITE_URL } from "@/config/environment";
 
 export const dynamic = "force-dynamic";
 

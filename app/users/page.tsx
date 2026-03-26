@@ -18,7 +18,7 @@ export default async function UsersDemoPage() {
 
     try {
         // Hỗ trợ biến môi trường dành riêng cho Demo endpoint (DEMO_API_URL)
-        let apiUrl: string = process.env.DEMO_API_URL as string;
+        let apiUrl = process.env.DEMO_API_URL || API_URL;
         apiUrl = apiUrl.replace('/api/v1', '');
 
 
