@@ -17,12 +17,10 @@ export default async function UsersDemoPage() {
     let error: string | null = null;
 
     try {
-        // Gọi trực tiếp đến /users (không dùng /api theo như cấu hình rút gọn lúc nãy)
-        // Hỗ trợ biến môi trường dành riêng cho Demo endpoint (NEXT_PUBLIC_DEMO_API_URL)
-        const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL?.trim();
-        const apiUrl = demoApiUrl
-            ? demoApiUrl.replace(/\/$/, '')
-            : API_URL.replace(/\/api\/v1$/, '');
+        // Hỗ trợ biến môi trường dành riêng cho Demo endpoint (DEMO_API_URL)
+        let apiUrl: string = process.env.DEMO_API_URL as string;
+        apiUrl = apiUrl.replace('/api/v1', '');
+
 
         const endpoint = `${apiUrl}/users`;
 

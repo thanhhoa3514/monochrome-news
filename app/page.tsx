@@ -98,28 +98,28 @@ export default async function HomePage() {
                 </span>
                 Live Updates
               </div>
-              
+
               <h1 className="font-serif text-5xl md:text-7xl font-black leading-[0.9] tracking-tighter">
                 Breaking News and <br />
                 <span className="text-muted-foreground italic">Real-Time</span> Updates
               </h1>
-              
+
               <p className="text-lg md:text-xl text-muted-foreground/80 max-w-xl leading-relaxed">
-                Follow major stories across politics, business, technology, science, culture, and sports. 
+                Follow major stories across politics, business, technology, science, culture, and sports.
                 Experience news with a new perspective.
               </p>
-              
+
               <div className="pt-4 flex flex-wrap gap-4">
                 <button className="px-8 py-4 bg-foreground text-background font-bold uppercase tracking-widest text-xs rounded-full hover:bg-actionRed hover:text-white transition-all shadow-xl hover:shadow-actionRed/20 active:scale-95">
                   Latest Headlines
                 </button>
                 <button className="px-8 py-4 bg-background text-foreground border border-border/60 font-bold uppercase tracking-widest text-xs rounded-full hover:bg-muted transition-all active:scale-95">
-                   Today&apos;s Edition
+                  Today&apos;s Edition
                 </button>
               </div>
             </div>
           </div>
-          
+
           {/* Decorative background element */}
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/3 h-full bg-gradient-to-l from-muted/20 to-transparent blur-3xl rounded-full" />
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-actionRed/5 blur-3xl rounded-full" />
