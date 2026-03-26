@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
 
     try {
         const [newsData, categoriesData, usersData] = await Promise.all([
-            authenticatedServerNewsService.getNews({ per_page: 1 }),
+            authenticatedServerNewsService.getAllNews({ per_page: 1 }),
             serverNewsService.getCategories(),
             serverUserService.getUsers(1, 1)
         ]);

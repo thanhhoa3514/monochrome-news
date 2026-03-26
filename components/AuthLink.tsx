@@ -1,5 +1,5 @@
 "use client";
-import { User, LogOut } from 'lucide-react';
+import { Shield, FileEdit, LogOut } from 'lucide-react';
 import React from 'react';
 import NextLink from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,21 +47,25 @@ const AuthLink = () => {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <NextLink href="/profile" className="cursor-pointer flex items-center">
-                                <User className="mr-2 h-4 w-4" />
-                                <span>{t('nav.profile') || 'Hồ sơ'}</span>
-                            </NextLink>
-                        </DropdownMenuItem>
                         {user.roles?.some(r => r.slug === 'admin') && (
                             <DropdownMenuItem asChild>
                                 <NextLink href="/admin" className="cursor-pointer flex items-center">
-                                    <User className="mr-2 h-4 w-4" />
+                                    <Shield className="mr-2 h-4 w-4" />
                                     <span>{t('nav.admin') || 'Quản trị'}</span>
                                 </NextLink>
                             </DropdownMenuItem>
                         )}
-                        <DropdownMenuSeparator />
+                        {user.roles?.some(r => r.slug === 'editor') && !user.roles?.some(r => r.slug === 'admin') && (
+                            <DropdownMenuItem asChild>
+                                <NextLink href="/editor" className="cursor-pointer flex items-center">
+                                    <FileEdit className="mr-2 h-4 w-4" />
+                                    <span>{t('nav.editor') || 'Biên tập'}</span>
+                                </NextLink>
+                            </DropdownMenuItem>
+                        )}
+                        {(user.roles?.some(r => r.slug === 'admin') || user.roles?.some(r => r.slug === 'editor')) && (
+                            <DropdownMenuSeparator />
+                        )}
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30">
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>{t('nav.logout') || 'Đăng xuất'}</span>

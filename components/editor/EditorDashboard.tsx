@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Eye, CheckCircle, FileEdit } from 'lucide-react';
-import Link from 'next/link';
 import { authenticatedServerNewsService } from '@/lib/server';
 
 export default async function EditorDashboard() {
@@ -18,6 +17,21 @@ export default async function EditorDashboard() {
     } catch (error) {
         console.error('Failed to fetch editor stats:', error);
     }
+
+    const upcomingActions = [
+        {
+            title: 'Create New Article',
+            description: 'The secured editor composer route is not published yet.',
+        },
+        {
+            title: 'AI Generator',
+            description: 'AI generation is protected in the API and will be re-enabled when the editor flow is ready.',
+        },
+        {
+            title: 'Manage Tags',
+            description: 'Tag management stays disabled here until a dedicated editor route exists.',
+        },
+    ];
 
     return (
         <div className="space-y-6">
@@ -86,27 +100,20 @@ export default async function EditorDashboard() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Link
-                            href="/editor/articles/new"
-                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors block"
-                        >
-                            <h3 className="font-semibold mb-2">📝 Create New Article</h3>
-                            <p className="text-sm text-muted-foreground">Start writing a new article from scratch</p>
-                        </Link>
-                        <Link
-                            href="/editor/ai-generator"
-                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors block"
-                        >
-                            <h3 className="font-semibold mb-2">✨ AI Generator</h3>
-                            <p className="text-sm text-muted-foreground">Generate content using AI assistance</p>
-                        </Link>
-                        <Link
-                            href="/editor/tags"
-                            className="p-4 border rounded-lg hover:bg-muted/50 transition-colors block"
-                        >
-                            <h3 className="font-semibold mb-2">🏷️ Manage Tags</h3>
-                            <p className="text-sm text-muted-foreground">Create and organize content tags</p>
-                        </Link>
+                        {upcomingActions.map((action) => (
+                            <div
+                                key={action.title}
+                                className="p-4 border rounded-lg bg-muted/20 opacity-80"
+                            >
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                    <h3 className="font-semibold">{action.title}</h3>
+                                    <span className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        Coming Soon
+                                    </span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{action.description}</p>
+                            </div>
+                        ))}
                     </div>
                 </CardContent>
             </Card>
