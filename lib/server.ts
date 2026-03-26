@@ -7,30 +7,32 @@
  */
 import "server-only";
 
-import { serverApiClient } from "@/lib/server-api";
+import { authenticatedServerApiClient, publicServerApiClient } from "@/lib/server-api";
 import { createNewsApi } from "@/lib/api/news";
 import { createTagApi } from "@/lib/api/tags";
 import { createUserApi } from "@/lib/api/users";
 import { createPermissionApi } from "@/lib/api/permissions";
 import type { AuthenticatedUserResponse } from "@/types/auth/auth";
 
-// ─── News ────────────────────────────────────────────
-export const serverNewsService = createNewsApi(serverApiClient);
+// ─── Public News ─────────────────────────────────────
+export const serverNewsService = createNewsApi(publicServerApiClient);
+export const authenticatedServerNewsService = createNewsApi(authenticatedServerApiClient);
 
 // ─── Tags ────────────────────────────────────────────
-export const serverTagService = createTagApi(serverApiClient);
+export const serverTagService = createTagApi(publicServerApiClient);
+export const authenticatedServerTagService = createTagApi(authenticatedServerApiClient);
 
 // ─── Users ───────────────────────────────────────────
-export const serverUserService = createUserApi(serverApiClient);
+export const serverUserService = createUserApi(authenticatedServerApiClient);
 
 // ─── Permissions ─────────────────────────────────────
-export const serverPermissionService = createPermissionApi(serverApiClient);
+export const serverPermissionService = createPermissionApi(authenticatedServerApiClient);
 
 // ─── Auth ────────────────────────────────────────────
 export const serverAuthService = {
     async me() {
         try {
-            const response = await serverApiClient.request<AuthenticatedUserResponse>("/auth/me");
+            const response = await authenticatedServerApiClient.request<AuthenticatedUserResponse>("/auth/me");
             return response.user;
         } catch {
             return null;

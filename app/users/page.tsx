@@ -1,6 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { UserListItem } from '@/types/user';
+import { API_URL } from '@/config/environment';
 
 export const metadata: Metadata = {
     title: 'User List | Teacher Demo',
@@ -18,9 +19,10 @@ export default async function UsersDemoPage() {
     try {
         // Gọi trực tiếp đến /users (không dùng /api theo như cấu hình rút gọn lúc nãy)
         // Hỗ trợ biến môi trường dành riêng cho Demo endpoint (NEXT_PUBLIC_DEMO_API_URL)
-        const apiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL || (process.env.NEXT_PUBLIC_API_URL
-            ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '')
-            : 'https://backend-php-news-app.onrender.com');
+        const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL?.trim();
+        const apiUrl = demoApiUrl
+            ? demoApiUrl.replace(/\/$/, '')
+            : API_URL.replace(/\/api\/v1$/, '');
 
         const endpoint = `${apiUrl}/users`;
 

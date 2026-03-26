@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Eye, CheckCircle, FileEdit } from 'lucide-react';
 import Link from 'next/link';
-import { serverNewsService } from '@/lib/server';
+import { authenticatedServerNewsService } from '@/lib/server';
 
 export default async function EditorDashboard() {
     let stats = {
@@ -14,7 +14,7 @@ export default async function EditorDashboard() {
     };
 
     try {
-        stats = await serverNewsService.getEditorStats();
+        stats = await authenticatedServerNewsService.getEditorStats();
     } catch (error) {
         console.error('Failed to fetch editor stats:', error);
     }

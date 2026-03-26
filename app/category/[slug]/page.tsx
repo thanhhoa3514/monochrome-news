@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/news/empty-state";
 import { NewsCardServer } from "@/components/news/news-card-server";
 import { serverNewsService } from "@/lib/server";
+import { SITE_URL } from "@/config/environment";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ export default async function CategoryPage({
 
   try {
     const response = await serverNewsService.getNewsByCategorySlug(params.slug, page);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = SITE_URL;
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",

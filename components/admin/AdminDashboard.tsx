@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { serverNewsService } from '@/lib/server';
+import { authenticatedServerNewsService, serverNewsService } from '@/lib/server';
 import { serverUserService } from '@/lib/server';
 
 export default async function AdminDashboard() {
@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
 
     try {
         const [newsData, categoriesData, usersData] = await Promise.all([
-            serverNewsService.getNews({ per_page: 1 }),
+            authenticatedServerNewsService.getNews({ per_page: 1 }),
             serverNewsService.getCategories(),
             serverUserService.getUsers(1, 1)
         ]);

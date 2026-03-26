@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { User } from '@/types/auth/auth';
 import { logoutAction } from '@/app/actions/auth';
+import { clientAuthService } from '@/lib/client';
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +27,34 @@ interface AuthProviderProps {
  */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUser }) => {
     const [user, setUser] = useState<User | null>(initialUser);
+
+    useEffect(() => {
+        if (initialUser) {
+            return;
+        }
+
+        let isCancelled = false;
+
+        const hydrateUser = async () => {
+            try {
+                const response = await clientAuthService.me();
+
+                if (!isCancelled) {
+                    setUser(response.user);
+                }
+            } catch {
+                if (!isCancelled) {
+                    setUser(null);
+                }
+            }
+        };
+
+        void hydrateUser();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [initialUser]);
 
     const login = useCallback((newUser: User) => {
         setUser(newUser);

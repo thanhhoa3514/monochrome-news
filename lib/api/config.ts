@@ -1,5 +1,6 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://backend-php-news-app.onrender.com";
+import { API_URL } from "@/config/environment";
+
+export const API_BASE_URL = API_URL;
 
 export const API_PREFIX = "/api/v1";
 export const API_PROXY_PREFIX = "/api/proxy";

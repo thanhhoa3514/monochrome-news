@@ -19,8 +19,8 @@ const AuthLink = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const { t } = useLanguage();
     
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
     };
 
     return (

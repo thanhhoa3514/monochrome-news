@@ -11,8 +11,9 @@ type AuthActionResult = {
     error?: string;
 };
 
-function persistAuthCookie(token: string, expiresIn?: number) {
-    cookies().set(AUTH_COOKIE_NAME, token, {
+async function persistAuthCookie(token: string, expiresIn?: number) {
+    const cookieStore = await cookies();
+    cookieStore.set(AUTH_COOKIE_NAME, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",
@@ -63,7 +64,8 @@ export async function loginAction(credentials: LoginCredentials): Promise<AuthAc
 }
 
 export async function logoutAction() {
-    const token = cookies().get(AUTH_COOKIE_NAME)?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
 
     try {
         if (token) {
@@ -77,7 +79,7 @@ export async function logoutAction() {
             });
         }
     } finally {
-        cookies().delete(AUTH_COOKIE_NAME);
+        cookieStore.delete(AUTH_COOKIE_NAME);
     }
 
     return { success: true };
