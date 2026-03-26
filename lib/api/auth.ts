@@ -3,6 +3,7 @@ import type {
     LoginCredentials,
     RegisterData,
     AuthResponse,
+    AuthenticatedUserResponse,
     VerifyOtpData,
 } from "@/types/auth/auth";
 
@@ -26,7 +27,7 @@ export function createAuthApi(client: ApiClient) {
         verifyOtp: (email: string, otp: string) =>
             client.request<{ message: string }>("/otp/verify", { method: "POST", body: { email, otp } }),
 
-        me: () => client.request<AuthResponse["user"]>("/auth/me"),
+        me: () => client.request<AuthenticatedUserResponse>("/auth/me"),
 
         updateProfile: (data: FormData) =>
             client.request<{ user: AuthResponse["user"] }>("/auth/update-profile", {

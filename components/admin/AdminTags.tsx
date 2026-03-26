@@ -1,13 +1,13 @@
 import React from 'react';
 import AdminTagsClient from './AdminTagsClient';
-import { serverTagService } from '@/lib/server';
+import { authenticatedServerTagService } from '@/lib/server';
 import { Tag } from '@/types/tag';
 
 export default async function AdminTags() {
     let initialTags: Tag[] = [];
 
     try {
-        const response = await serverTagService.getTags({ per_page: 50 });
+        const response = await authenticatedServerTagService.getTags({ per_page: 50 });
         if (Array.isArray(response)) {
             initialTags = response;
         } else {

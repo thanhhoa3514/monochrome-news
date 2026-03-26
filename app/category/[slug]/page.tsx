@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/news/empty-state";
 import { NewsCardServer } from "@/components/news/news-card-server";
 import { serverNewsService } from "@/lib/server";
+import { SITE_URL } from "@/config/environment";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ export default async function CategoryPage({
 
   try {
     const response = await serverNewsService.getNewsByCategorySlug(params.slug, page);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = SITE_URL;
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -95,7 +96,7 @@ export default async function CategoryPage({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        
+
         <header className="mb-12">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-actionRed mb-4 transition-all">
             <span className="h-px w-8 bg-actionRed" />
@@ -118,16 +119,16 @@ export default async function CategoryPage({
 
         {response.last_page > 1 && (
           <div className="flex items-center justify-center gap-4 mt-16 pt-8 border-t border-border/40">
-            <Link 
+            <Link
               href={`/category/${params.slug}?page=${response.current_page - 1}`}
               className={`px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider transition-all
-                ${response.current_page > 1 
-                  ? "border-border hover:bg-foreground hover:text-background" 
+                ${response.current_page > 1
+                  ? "border-border hover:bg-foreground hover:text-background"
                   : "border-border/20 text-muted-foreground/40 pointer-events-none"}`}
             >
               Previous
             </Link>
-            
+
             <div className="flex items-center gap-2">
               {Array.from({ length: Math.min(5, response.last_page) }, (_, i) => {
                 const pageNum = i + 1;
@@ -136,8 +137,8 @@ export default async function CategoryPage({
                     key={pageNum}
                     href={`/category/${params.slug}?page=${pageNum}`}
                     className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-all
-                      ${response.current_page === pageNum 
-                        ? "bg-actionRed text-white" 
+                      ${response.current_page === pageNum
+                        ? "bg-actionRed text-white"
                         : "hover:bg-muted font-medium"}`}
                   >
                     {pageNum}
@@ -146,11 +147,11 @@ export default async function CategoryPage({
               })}
             </div>
 
-            <Link 
+            <Link
               href={`/category/${params.slug}?page=${response.current_page + 1}`}
               className={`px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider transition-all
-                ${response.current_page < response.last_page 
-                  ? "border-border hover:bg-foreground hover:text-background" 
+                ${response.current_page < response.last_page
+                  ? "border-border hover:bg-foreground hover:text-background"
                   : "border-border/20 text-muted-foreground/40 pointer-events-none"}`}
             >
               Next

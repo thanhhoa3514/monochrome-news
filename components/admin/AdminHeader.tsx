@@ -20,31 +20,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Bell, User, LogOut, Settings, Home } from 'lucide-react';
+import { Search, Bell, LogOut, Home } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { ADMIN_TAB_LABELS, AdminTab } from './admin-tabs';
 
 interface AdminHeaderProps {
-    selectedTab: string;
+    selectedTab: AdminTab;
 }
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
     const navigate = useRouter();
     const { user, logout } = useAuth();
-
-    const getTabName = (tab: string) => {
-        switch (tab) {
-            case 'dashboard': return 'Dashboard';
-            case 'articles': return 'Articles';
-            case 'users': return 'Users';
-            case 'subscriptions': return 'Subscriptions';
-            case 'permissions': return 'Permissions';
-            case 'ai-articles': return 'AI News Generator';
-            case 'tags': return 'Tags';
-            case 'settings': return 'Settings';
-            case 'profile': return 'Profile';
-            default: return 'Dashboard';
-        }
-    };
 
     const handleLogout = async () => {
         await logout();
@@ -69,7 +55,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                             <BreadcrumbPage className="font-semibold text-primary">
-                                {getTabName(selectedTab)}
+                                {ADMIN_TAB_LABELS[selectedTab]}
                             </BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
@@ -114,16 +100,10 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate.push('/admin/profile')}>
-                            <User className="mr-2 h-4 w-4" />
-                            <span>Profile</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate.push('/admin/settings')}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+                        <DropdownMenuItem
+                            onClick={handleLogout}
+                            className="text-red-600 focus:text-red-600"
+                        >
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>
                         </DropdownMenuItem>

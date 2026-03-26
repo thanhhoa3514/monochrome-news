@@ -1,10 +1,7 @@
 import React from 'react';
 import AdminArticlesClient from './AdminArticlesClient';
-import { serverApiClient } from '@/lib/server-api';
-import { createNewsApi } from '@/lib/api/news';
+import { authenticatedServerNewsService, serverNewsService } from '@/lib/server';
 import { PaginatedResponse, News, Category } from '@/types/news';
-
-const newsApi = createNewsApi(serverApiClient);
 
 export default async function AdminArticles() {
     let articles: News[] = [];
@@ -14,8 +11,8 @@ export default async function AdminArticles() {
 
     try {
         const [newsResponse, categoriesData] = await Promise.all([
-            newsApi.getNews({ page: 1, per_page: 50 }) as Promise<PaginatedResponse<News>>,
-            newsApi.getCategories(),
+            authenticatedServerNewsService.getAllNews({ page: 1, per_page: 50 }) as Promise<PaginatedResponse<News>>,
+            serverNewsService.getCategories(),
         ]);
         articles = newsResponse.data;
         totalPages = newsResponse.last_page;
