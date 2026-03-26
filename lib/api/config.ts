@@ -1,7 +1,9 @@
-export const API_BASE_URL =
-  process.env.API_URL;
+import { API_URL } from "@/config/environment";
+
+export const API_BASE_URL = API_URL;
 
 export const API_PREFIX = "/api/v1";
+export const API_PROXY_PREFIX = "/api/proxy";
 export const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? "auth_token";
 
 export function toApiUrl(path: string): string {

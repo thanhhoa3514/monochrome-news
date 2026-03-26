@@ -2,13 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/news/empty-state";
-import { serverNewsService } from "@/lib/server";
+import { authenticatedServerNewsService } from "@/lib/server";
+import { ApiError } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewsDetailPage({ params }: { params: { id: string } }) {
   try {
-    const article = await serverNewsService.getNewsById(params.id);
+    const article = await authenticatedServerNewsService.getNewsById(params.id);
 
     if (!article || !article.id) {
       notFound();
@@ -90,7 +91,20 @@ export default async function NewsDetailPage({ params }: { params: { id: string 
         </footer>
       </main>
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      notFound();
+    }
+
+    if (error instanceof ApiError && error.status === 403) {
+      return (
+        <EmptyState
+          title="Article access restricted"
+          description={error.message}
+        />
+      );
+    }
+
     return (
       <EmptyState
         title="Unable to load article"

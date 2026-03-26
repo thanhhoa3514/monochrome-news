@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { serverNewsService, serverAuthService } from "@/lib/server";
+import { serverNewsService } from "@/lib/server";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/lib/language-context";
 import AuthLink from "./AuthLink";
@@ -20,16 +20,16 @@ const fallbackCategories = [
 ];
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
-  const [categories, initialUser] = await Promise.all([
-    serverNewsService.getCategories().then((list) => list.slice(0, 14)).catch(() => fallbackCategories),
-    serverAuthService.me(),
-  ]);
+  const categories = await serverNewsService
+    .getCategories()
+    .then((list) => list.slice(0, 14))
+    .catch(() => fallbackCategories);
   const primaryCategories = categories.slice(0, 10);
   const overflowCategories = categories.slice(10);
 
   return (
     <LanguageProvider>
-      <AuthProvider initialUser={initialUser}>
+      <AuthProvider initialUser={null}>
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="container flex items-center justify-between py-4">
           <div className="flex items-center gap-8">

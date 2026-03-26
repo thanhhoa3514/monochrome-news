@@ -33,6 +33,7 @@ export interface NewsQueryParams {
   is_premium?: boolean;
   tag_id?: number;
   q?: string;
+  status?: string;
 }
 
 export interface EditorStats {
@@ -50,6 +51,7 @@ function toQueryString(params: NewsQueryParams = {}): string {
   if (typeof params.is_premium === "boolean") qs.append("is_premium", String(params.is_premium));
   if (params.tag_id) qs.append("tag_id", String(params.tag_id));
   if (params.q) qs.append("q", params.q);
+  if (params.status) qs.append("status", params.status);
   return qs.toString();
 }
 
@@ -65,6 +67,13 @@ export function createNewsApi(client: ApiClient) {
       return client.request<PaginatedResponse<NewsItem>>(
         query ? `${endpoint}?${query}` : endpoint,
         { next: { revalidate: 300 } },
+      );
+    },
+
+    getAllNews: (params: NewsQueryParams = {}) => {
+      const query = toQueryString(params);
+      return client.request<PaginatedResponse<NewsItem>>(
+        query ? `/news/all?${query}` : "/news/all"
       );
     },
 
@@ -94,7 +103,7 @@ export function createNewsApi(client: ApiClient) {
     getPopularNews: async () => (await client.request<PaginatedResponse<NewsItem>>("/news?per_page=4", {
       next: { revalidate: 300 },
     })).data,
-    getEditorStats: () => client.request<EditorStats>("/editor/stats"),
+    getEditorStats: () => client.request<EditorStats>("/news/editor/stats"),
     getAiGenerations: () => client.request<{ data: AiGeneration[] }>("/ai-generations"),
 
     deleteNews: (id: number) =>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import AdminAIArticlesClient from './AdminAIArticlesClient';
-import { serverNewsService } from '@/lib/server';
+import { authenticatedServerNewsService, serverNewsService } from '@/lib/server';
 import { Category } from '@/types/news';
 
 export default async function AdminAIArticles() {
@@ -10,7 +10,7 @@ export default async function AdminAIArticles() {
 
     try {
         const fetchCategoriesPromise = serverNewsService.getCategories();
-        const fetchHistoryPromise = serverNewsService.getAiGenerations();
+        const fetchHistoryPromise = authenticatedServerNewsService.getAiGenerations();
 
         const [categoriesResponse, historyResponse] = await Promise.all([
             fetchCategoriesPromise,

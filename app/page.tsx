@@ -3,6 +3,7 @@ import { NewsGridSection } from "@/components/news/news-grid-section";
 import { EmptyState } from "@/components/news/empty-state";
 import { serverNewsService } from "@/lib/server";
 import type { NewsItem, PaginatedResponse, NewsCategory } from "@/lib/api/news";
+import { SITE_URL } from "@/config/environment";
 
 export const revalidate = 300; // Cache homepage for 5 minutes
 
@@ -57,7 +58,7 @@ export default async function HomePage() {
     const safeTechData = Array.isArray(techResponse) ? techResponse : (techResponse as PaginatedResponse<NewsItem>).data || [];
     const safeBusinessData = Array.isArray(businessResponse) ? businessResponse : (businessResponse as PaginatedResponse<NewsItem>).data || [];
 
-    const siteUrl = process.env.SITE_URL;
+    const siteUrl = SITE_URL;
     const topArticles = [...featuredArticles, ...latestArticles].slice(0, 8);
 
     // If we have literally no news at all, show empty state instead of broken layout
