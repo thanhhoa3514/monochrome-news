@@ -94,7 +94,7 @@ export async function registerAction(data: RegisterData): Promise<AuthActionResu
         }
 
         if (result.token && result.user) {
-            persistAuthCookie(result.token, result.expires_in);
+            await persistAuthCookie(result.token, result.expires_in);
             return { success: true, user: result.user, message: result.message };
         }
 
