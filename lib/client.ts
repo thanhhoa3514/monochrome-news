@@ -2,8 +2,8 @@
  * Client-side API service instances.
  * Import from "@/lib/client" in any Client Component ("use client").
  *
- * These are pre-wired to use the client API client (which attaches
- * the auth_token from localStorage automatically).
+ * These are pre-wired to use the client API proxy, allowing browser
+ * requests to authenticate through the Next.js httpOnly auth cookie.
  */
 "use client";
 

@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { User } from '@/types/auth/auth';
-import { clientApiClient } from '@/lib/client-api';
+import { logoutAction } from '@/app/actions/auth';
 
 interface AuthContextType {
     user: User | null;
-    login: (user: User, token?: string) => void;
-    logout: () => void;
+    login: (user: User) => void;
+    logout: () => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -27,20 +27,16 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUser }) => {
     const [user, setUser] = useState<User | null>(initialUser);
 
-    const login = useCallback((newUser: User, token?: string) => {
-        if (token) {
-            localStorage.setItem('auth_token', token);
-        }
+    const login = useCallback((newUser: User) => {
         setUser(newUser);
     }, []);
 
     const logout = useCallback(async () => {
         try {
-            await clientApiClient.request('/auth/logout', { method: 'POST' });
+            await logoutAction();
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            localStorage.removeItem('auth_token');
             setUser(null);
         }
     }, []);

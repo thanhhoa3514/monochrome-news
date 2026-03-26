@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { AUTH_COOKIE_NAME, toApiUrl } from "@/lib/api/config";
 import { normalizeBody, normalizeHeaders, unwrapOrThrow } from "@/lib/api/shared";
 import type { ApiClient, ApiClientRequestOptions } from "@/lib/api/types";
@@ -9,18 +9,12 @@ export const serverApiClient: ApiClient = {
   async request<T>(path: string, options: ApiClientRequestOptions = {}): Promise<T> {
     const requestHeaders = normalizeHeaders(options.headers);
     const cookieStore = cookies();
-    const incomingHeaders = headers();
 
     if (!requestHeaders.has("Authorization")) {
       const authToken = cookieStore.get(AUTH_COOKIE_NAME)?.value;
       if (authToken) {
         requestHeaders.set("Authorization", `Bearer ${authToken}`);
       }
-    }
-
-    const rawCookie = incomingHeaders.get("cookie");
-    if (rawCookie && !requestHeaders.has("Cookie")) {
-      requestHeaders.set("Cookie", rawCookie);
     }
 
     const body = normalizeBody(requestHeaders, options.body);

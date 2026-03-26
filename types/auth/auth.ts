@@ -41,3 +41,8 @@ export interface AuthResponse {
     token_type?: string;
     expires_in?: number;
 }
+
+export interface AuthenticatedUserResponse {
+    user: User;
+    can_access_premium: boolean;
+}

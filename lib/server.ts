@@ -12,7 +12,7 @@ import { createNewsApi } from "@/lib/api/news";
 import { createTagApi } from "@/lib/api/tags";
 import { createUserApi } from "@/lib/api/users";
 import { createPermissionApi } from "@/lib/api/permissions";
-import type { AuthResponse } from "@/types/auth/auth";
+import type { AuthenticatedUserResponse } from "@/types/auth/auth";
 
 // ─── News ────────────────────────────────────────────
 export const serverNewsService = createNewsApi(serverApiClient);
@@ -30,8 +30,8 @@ export const serverPermissionService = createPermissionApi(serverApiClient);
 export const serverAuthService = {
     async me() {
         try {
-            const user = await serverApiClient.request<AuthResponse["user"]>("/auth/me");
-            return user;
+            const response = await serverApiClient.request<AuthenticatedUserResponse>("/auth/me");
+            return response.user;
         } catch {
             return null;
         }
