@@ -7,7 +7,8 @@ import {
     Shield,
     CreditCard,
     Sparkles,
-    Tag
+    Tag,
+    LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ interface AdminSidebarProps {
 const navItems: Array<{
     tab: AdminTab;
     label: string;
-    icon: React.ComponentType<{ size?: number; className?: string }>;
+    icon: LucideIcon;
 }> = [
     { tab: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { tab: 'articles', label: 'Articles', icon: FileText },

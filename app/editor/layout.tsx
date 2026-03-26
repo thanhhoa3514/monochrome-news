@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { serverAuthService } from "@/lib/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditorLayout({
     children,
 }: {
