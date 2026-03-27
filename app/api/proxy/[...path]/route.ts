@@ -27,12 +27,17 @@ async function proxyRequest(request: NextRequest, { params }: ProxyContext) {
     requestHeaders.set("Authorization", `Bearer ${authToken}`);
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+
   const response = await fetch(backendUrl, {
     method: request.method,
     headers: requestHeaders,
     body: ["GET", "HEAD"].includes(request.method) ? undefined : await request.arrayBuffer(),
     cache: "no-store",
-  });
+    signal: controller.signal
+  }).finally(()=> clearTimeout(timeoutId));
 
   const responseHeaders = new Headers();
   const contentType = response.headers.get("content-type");
