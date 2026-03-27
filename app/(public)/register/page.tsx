@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerAction } from '@/app/actions/auth';
@@ -35,8 +35,12 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login } = useAuth();
     const { toast } = useToast();
+
+    const requestedRedirect = searchParams.get('redirect');
+    const safeRedirect = requestedRedirect?.startsWith('/') ? requestedRedirect : null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,12 +68,12 @@ export default function RegisterPage() {
             });
 
             if (result.success && result.user) {
-                login(result.user);
+                login(result.user, result.canAccessPremium);
                 toast({
                     title: 'Tạo tài khoản thành công',
                     description: result.message || 'Tài khoản của bạn đã sẵn sàng sử dụng.',
                 });
-                router.push(resolvePostAuthDestination(result.user));
+                router.push(safeRedirect || resolvePostAuthDestination(result.user));
                 router.refresh();
             } else {
                 const message = result.error || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
