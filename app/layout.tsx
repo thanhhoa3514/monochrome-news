@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Merriweather } from "next/font/google";
 import "./globals.css";
-import { SiteShell } from "@/components/site-shell";
+import { AppProviders } from "@/components/app-providers";
 import { SITE_URL } from "@/config/environment";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -75,7 +75,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${inter.variable} ${merriweather.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <SiteShell>{children}</SiteShell>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );
