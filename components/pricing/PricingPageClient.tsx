@@ -13,7 +13,7 @@ import { clientSubscriptionService } from "@/lib/client";
 import type { Plan } from "@/types/plan";
 import type { PaymentProvider, SePayCheckoutSessionResponse } from "@/types/payment";
 
-const SEPAY_ENABLED = false;
+const SEPAY_ENABLED = process.env.NEXT_PUBLIC_SEPAY_ENABLED === "true";
 
 interface PricingPageClientProps {
   plans: Plan[] | null;
@@ -72,6 +72,7 @@ export function PricingPageClient({
     initialProvider === "sepay" && !SEPAY_ENABLED ? "stripe" : initialProvider,
   );
   const [sepayCheckout, setSepayCheckout] = useState<SePayCheckoutSessionResponse | null>(null);
+  const [sepayStatus, setSepayStatus] = useState<"pending" | "active" | "cancelled" | "expired">("pending");
   const hasPlanLoadError = plans === null;
   const checkoutInFlightRef = useRef(false);
 
@@ -99,7 +100,22 @@ export function PricingPageClient({
         }
 
         try {
-          await refreshAuth();
+          const subscription = await clientSubscriptionService.getById(sepayCheckout.subscriptionId);
+
+          if (isCancelled) {
+            return;
+          }
+
+          setSepayStatus(subscription.status);
+
+          if (subscription.status === "active") {
+            await refreshAuth();
+            return;
+          }
+
+          if (subscription.status === "cancelled" || subscription.status === "expired") {
+            return;
+          }
         } catch {
           // keep polling through transient proxy or webhook timing issues
         }
@@ -170,6 +186,7 @@ export function PricingPageClient({
       checkoutInFlightRef.current = true;
 
       setLoadingPlanId(plan.id);
+      setSepayCheckout(null);
       const result = await clientSubscriptionService.createCheckoutSession(plan.id, selectedProvider);
 
       if (result.provider === "stripe") {
@@ -178,11 +195,13 @@ export function PricingPageClient({
       }
 
       setSepayCheckout(result);
+      setSepayStatus("pending");
       toast({
         title: "SePay checkout ready",
         description: "Scan the QR code or copy the bank transfer details below.",
       });
     } catch (error) {
+      setSepayCheckout(null);
       const message = error instanceof Error ? error.message : "Unable to start checkout right now.";
       toast({
         title: "Checkout unavailable",
@@ -338,9 +357,11 @@ export function PricingPageClient({
                   </ul>
                 </div>
                 <div className={`rounded-2xl border px-4 py-3 text-sm ${canAccessPremium ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-amber-300 bg-amber-50 text-amber-900"}`}>
-                  {canAccessPremium
+                  {canAccessPremium || sepayStatus === "active"
                     ? "Payment confirmed. Premium access is now active on this account."
-                    : "Waiting for SePay webhook confirmation. Keep this page open or refresh your account status in a moment."}
+                    : sepayStatus === "cancelled" || sepayStatus === "expired"
+                      ? "This SePay payment is no longer pending. Please start a new checkout if you still want to upgrade."
+                      : "Waiting for SePay webhook confirmation. Keep this page open or refresh your account status in a moment."}
                 </div>
               </div>
             </CardContent>
