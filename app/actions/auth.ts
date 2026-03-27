@@ -7,6 +7,7 @@ import type { LoginCredentials, AuthResponse, RegisterData, User } from "@/types
 type AuthActionResult = {
     success: boolean;
     user?: User;
+    canAccessPremium?: boolean;
     message?: string;
     error?: string;
 };
@@ -41,6 +42,32 @@ async function requestAuth(
     return { response, result };
 }
 
+async function resolveAuthState(token: string, fallbackUser?: User): Promise<{ user?: User; canAccessPremium: boolean }> {
+    try {
+        const response = await fetch(`${API_BASE_URL}${API_PREFIX}/auth/me`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            return { user: fallbackUser, canAccessPremium: false };
+        }
+
+        const result = await response.json() as { user?: User; can_access_premium?: boolean };
+
+        return {
+            user: result.user ?? fallbackUser,
+            canAccessPremium: Boolean(result.can_access_premium),
+        };
+    } catch {
+        return { user: fallbackUser, canAccessPremium: false };
+    }
+}
+
 export async function loginAction(credentials: LoginCredentials): Promise<AuthActionResult> {
     try {
         const { response, result } = await requestAuth("/auth/login", {
@@ -54,7 +81,13 @@ export async function loginAction(credentials: LoginCredentials): Promise<AuthAc
 
         if (result.token && result.user) {
             await persistAuthCookie(result.token, result.expires_in);
-            return { success: true, user: result.user, message: result.message };
+            const authState = await resolveAuthState(result.token, result.user);
+            return {
+                success: true,
+                user: authState.user ?? result.user,
+                canAccessPremium: authState.canAccessPremium,
+                message: result.message,
+            };
         }
 
         return { success: false, error: "Authentication token missing from response" };
@@ -95,7 +128,13 @@ export async function registerAction(data: RegisterData): Promise<AuthActionResu
 
         if (result.token && result.user) {
             await persistAuthCookie(result.token, result.expires_in);
-            return { success: true, user: result.user, message: result.message };
+            const authState = await resolveAuthState(result.token, result.user);
+            return {
+                success: true,
+                user: authState.user ?? result.user,
+                canAccessPremium: authState.canAccessPremium,
+                message: result.message,
+            };
         }
 
         return { success: false, error: "Authentication token missing from registration response" };

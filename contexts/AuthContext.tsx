@@ -7,8 +7,10 @@ import { clientAuthService } from '@/lib/client';
 
 interface AuthContextType {
     user: User | null;
-    login: (user: User) => void;
+    canAccessPremium: boolean;
+    login: (user: User, canAccessPremium?: boolean) => void;
     logout: () => Promise<void>;
+    refreshAuth: () => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -21,6 +23,18 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUser }) => {
     const [user, setUser] = useState<User | null>(initialUser);
+    const [canAccessPremium, setCanAccessPremium] = useState(false);
+
+    const refreshAuth = useCallback(async () => {
+        try {
+            const response = await clientAuthService.me();
+            setUser(response.user);
+            setCanAccessPremium(response.can_access_premium);
+        } catch {
+            setUser(null);
+            setCanAccessPremium(false);
+        }
+    }, []);
 
     useEffect(() => {
         if (initialUser) {
@@ -35,10 +49,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUse
 
                 if (!isCancelled) {
                     setUser(response.user);
+                    setCanAccessPremium(response.can_access_premium);
                 }
             } catch {
                 if (!isCancelled) {
                     setUser(null);
+                    setCanAccessPremium(false);
                 }
             }
         };
@@ -50,8 +66,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUse
         };
     }, [initialUser]);
 
-    const login = useCallback((newUser: User) => {
+    const login = useCallback((newUser: User, nextCanAccessPremium = false) => {
         setUser(newUser);
+        setCanAccessPremium(nextCanAccessPremium);
     }, []);
 
     const logout = useCallback(async () => {
@@ -61,15 +78,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUse
             console.error('Logout error:', error);
         } finally {
             setUser(null);
+            setCanAccessPremium(false);
         }
     }, []);
 
     const value = useMemo(() => ({
         user,
+        canAccessPremium,
         login,
         logout,
+        refreshAuth,
         isAuthenticated: !!user,
-    }), [user, login, logout]);
+    }), [user, canAccessPremium, login, logout, refreshAuth]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

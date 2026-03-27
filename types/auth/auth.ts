@@ -46,3 +46,8 @@ export interface AuthenticatedUserResponse {
     user: User;
     can_access_premium: boolean;
 }
+
+export interface AuthState {
+    user: User;
+    canAccessPremium: boolean;
+}
