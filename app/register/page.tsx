@@ -10,7 +10,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import type { User as AuthUser } from '@/types/auth/auth';
 import { UserPlus, Mail, Lock, User, Loader2, ArrowLeft } from 'lucide-react';
+
+function resolvePostAuthDestination(user: AuthUser): string {
+    if (user.roles?.some((role) => role.slug === 'admin')) {
+        return '/admin';
+    }
+
+    if (user.roles?.some((role) => role.slug === 'editor')) {
+        return '/editor';
+    }
+
+    return '/';
+}
 
 export default function RegisterPage() {
     const [name, setName] = useState('');
@@ -22,13 +36,20 @@ export default function RegisterPage() {
     
     const router = useRouter();
     const { login } = useAuth();
+    const { toast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
         if (password !== passwordConfirmation) {
-            setError('Mật khẩu xác nhận không khớp.');
+            const message = 'Mật khẩu xác nhận không khớp.';
+            setError(message);
+            toast({
+                title: 'Đăng ký thất bại',
+                description: message,
+                variant: 'destructive',
+            });
             return;
         }
 
@@ -44,13 +65,29 @@ export default function RegisterPage() {
 
             if (result.success && result.user) {
                 login(result.user);
-                router.push('/');
+                toast({
+                    title: 'Tạo tài khoản thành công',
+                    description: result.message || 'Tài khoản của bạn đã sẵn sàng sử dụng.',
+                });
+                router.push(resolvePostAuthDestination(result.user));
                 router.refresh();
             } else {
-                setError(result.error || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
+                const message = result.error || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
+                setError(message);
+                toast({
+                    title: 'Đăng ký thất bại',
+                    description: message,
+                    variant: 'destructive',
+                });
             }
         } catch {
-            setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');
+            const message = 'Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.';
+            setError(message);
+            toast({
+                title: 'Lỗi kết nối',
+                description: message,
+                variant: 'destructive',
+            });
         } finally {
             setIsLoading(false);
         }
