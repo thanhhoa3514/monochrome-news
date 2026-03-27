@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 };
 
 interface PaymentSuccessPageProps {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export default async function PaymentSuccessPage({ searchParams }: PaymentSuccessPageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+export default function PaymentSuccessPage({ searchParams }: PaymentSuccessPageProps) {
+  const resolvedSearchParams = searchParams ?? undefined;
   const sessionId = typeof resolvedSearchParams?.session_id === "string" ? resolvedSearchParams.session_id : null;
 
   return <PaymentSuccessClient sessionId={sessionId} />;

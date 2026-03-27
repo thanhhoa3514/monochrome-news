@@ -72,14 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, initialUse
     }, []);
 
     const logout = useCallback(async () => {
-        try {
-            await logoutAction();
-        } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            setUser(null);
-            setCanAccessPremium(false);
-        }
+        await logoutAction();
+        setUser(null);
+        setCanAccessPremium(false);
     }, []);
 
     const value = useMemo(() => ({

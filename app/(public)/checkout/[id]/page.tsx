@@ -8,13 +8,13 @@ export const metadata: Metadata = {
 };
 
 interface CheckoutCanceledPageProps {
-  params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  params: { id: string };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export default async function CheckoutCanceledPage({ params, searchParams }: CheckoutCanceledPageProps) {
-  const { id } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+export default function CheckoutCanceledPage({ params, searchParams }: CheckoutCanceledPageProps) {
+  const { id } = params;
+  const resolvedSearchParams = searchParams ?? undefined;
   const isCanceled = resolvedSearchParams?.canceled === "true";
 
   return (

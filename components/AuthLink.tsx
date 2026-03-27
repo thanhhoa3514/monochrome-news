@@ -1,7 +1,8 @@
 "use client";
-import { Shield, FileEdit, LogOut, Crown } from 'lucide-react';
-import React from 'react';
+import { Shield, FileEdit, LogOut, Crown, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
     DropdownMenu,
@@ -14,13 +15,33 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '@/lib/language-context';
+import { useToast } from '@/hooks/use-toast';
 
 const AuthLink = () => {
     const { user, isAuthenticated, canAccessPremium, logout } = useAuth();
     const { t } = useLanguage();
+    const { toast } = useToast();
+    const router = useRouter();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     
     const handleLogout = async () => {
-        await logout();
+        try {
+            setIsLoggingOut(true);
+            await logout();
+            toast({
+                title: 'Đăng xuất thành công',
+                description: 'Hẹn gặp lại bạn trong lần đọc tin tiếp theo.',
+            });
+            router.refresh();
+        } catch {
+            toast({
+                title: 'Đăng xuất thất bại',
+                description: 'Không thể kết thúc phiên đăng nhập lúc này. Vui lòng thử lại.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLoggingOut(false);
+        }
     };
 
     return (
@@ -92,9 +113,17 @@ const AuthLink = () => {
                             {(user.roles?.some(r => r.slug === 'admin') || user.roles?.some(r => r.slug === 'editor')) && (
                                 <DropdownMenuSeparator />
                             )}
-                            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>{t('nav.logout') || 'Đăng xuất'}</span>
+                            <DropdownMenuItem
+                                onClick={() => void handleLogout()}
+                                disabled={isLoggingOut}
+                                className="cursor-pointer text-red-600 focus:text-red-500 focus:bg-red-50 disabled:pointer-events-none disabled:opacity-60 dark:focus:bg-red-950/30"
+                            >
+                                {isLoggingOut ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                )}
+                                <span>{isLoggingOut ? 'Đang đăng xuất...' : (t('nav.logout') || 'Đăng xuất')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
