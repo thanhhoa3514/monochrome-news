@@ -2,7 +2,7 @@ import Link from "next/link";
 import { serverNewsService } from "@/lib/server";
 import type { ReactNode } from "react";
 import AuthLink from "./AuthLink";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 const fallbackCategories = [
   { name: "World", slug: "world" },
