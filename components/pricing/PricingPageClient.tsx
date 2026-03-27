@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Crown, Loader2 } from "lucide-react";
+import { Check, Crown, Loader2, QrCode, CreditCard, Copy, Landmark } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { clientSubscriptionService } from "@/lib/client";
 import type { Plan } from "@/types/plan";
+import type { PaymentProvider, SePayCheckoutSessionResponse } from "@/types/payment";
+
+const SEPAY_ENABLED = false;
 
 interface PricingPageClientProps {
   plans: Plan[] | null;
   canceledPlanId?: number;
+  initialProvider?: PaymentProvider;
 }
 
 function formatPrice(price: number) {
@@ -47,11 +51,27 @@ function buildPlanFeatures(plan: Plan): string[] {
   return fallback;
 }
 
-export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientProps) {
+function formatVnd(amount: number) {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function PricingPageClient({
+  plans,
+  canceledPlanId,
+  initialProvider = "stripe",
+}: PricingPageClientProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { isAuthenticated, canAccessPremium } = useAuth();
+  const { isAuthenticated, canAccessPremium, refreshAuth } = useAuth();
   const [loadingPlanId, setLoadingPlanId] = useState<number | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<PaymentProvider>(
+    initialProvider === "sepay" && !SEPAY_ENABLED ? "stripe" : initialProvider,
+  );
+  const [sepayCheckout, setSepayCheckout] = useState<SePayCheckoutSessionResponse | null>(null);
   const hasPlanLoadError = plans === null;
   const checkoutInFlightRef = useRef(false);
 
@@ -65,12 +85,68 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
     [plans],
   );
 
+  useEffect(() => {
+    if (!sepayCheckout || canAccessPremium) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const poll = async () => {
+      for (let attempt = 1; attempt <= 8; attempt += 1) {
+        if (isCancelled) {
+          return;
+        }
+
+        try {
+          await refreshAuth();
+        } catch {
+          // keep polling through transient proxy or webhook timing issues
+        }
+
+        if (isCancelled || attempt === 8) {
+          return;
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 3000));
+      }
+    };
+
+    void poll();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [canAccessPremium, refreshAuth, sepayCheckout]);
+
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({
+        title: `${label} copied`,
+        description: value,
+      });
+    } catch {
+      toast({
+        title: `Could not copy ${label.toLowerCase()}`,
+        description: "Please copy it manually.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePlanAction = async (plan: Plan) => {
     if (checkoutInFlightRef.current) {
       return;
     }
 
-
+    if (selectedProvider === "sepay" && !SEPAY_ENABLED) {
+      toast({
+        title: "SePay is disabled",
+        description: "This payment option is currently shown for demo purposes only.",
+      });
+      return;
+    }
 
     if (plan.price <= 0) {
       router.push(isAuthenticated ? "/" : "/register");
@@ -78,7 +154,7 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
     }
 
     if (!isAuthenticated) {
-      router.push(`/login?redirect=${encodeURIComponent("/pricing")}`);
+      router.push(`/login?redirect=${encodeURIComponent(`/pricing?provider=${selectedProvider}`)}`);
       return;
     }
 
@@ -94,8 +170,18 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
       checkoutInFlightRef.current = true;
 
       setLoadingPlanId(plan.id);
-      const result = await clientSubscriptionService.createCheckoutSession(plan.id);
-      window.location.assign(result.checkoutUrl);
+      const result = await clientSubscriptionService.createCheckoutSession(plan.id, selectedProvider);
+
+      if (result.provider === "stripe") {
+        window.location.assign(result.checkoutUrl);
+        return;
+      }
+
+      setSepayCheckout(result);
+      toast({
+        title: "SePay checkout ready",
+        description: "Scan the QR code or copy the bank transfer details below.",
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to start checkout right now.";
       toast({
@@ -133,7 +219,133 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
               Premium access is already active on this account.
             </div>
           ) : null}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button
+              type="button"
+              variant={selectedProvider === "stripe" ? "default" : "outline"}
+              className={selectedProvider === "stripe" ? "bg-actionRed text-white hover:bg-actionRed/90" : ""}
+              onClick={() => setSelectedProvider("stripe")}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Stripe
+            </Button>
+            <Button
+              type="button"
+              variant={selectedProvider === "sepay" ? "default" : "outline"}
+              className={selectedProvider === "sepay" ? "bg-actionRed text-white hover:bg-actionRed/90" : ""}
+              disabled={!SEPAY_ENABLED}
+              onClick={() => setSelectedProvider("sepay")}
+            >
+              <QrCode className="mr-2 h-4 w-4" />
+              SePay VietQR {!SEPAY_ENABLED ? "(Soon)" : ""}
+            </Button>
+          </div>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            {selectedProvider === "stripe"
+              ? "Use Stripe for international card payments and hosted checkout."
+              : "Use SePay for Vietnamese bank transfers via VietQR. Exact VND transfer details will be generated after you pick a plan."}
+          </p>
+          {!SEPAY_ENABLED ? (
+            <p className="max-w-2xl text-sm text-amber-700">
+              SePay is currently disabled on the client and kept visible only as a demo payment option.
+            </p>
+          ) : null}
         </div>
+
+        {sepayCheckout ? (
+          <Card className="border-2 border-border/60 bg-background">
+            <CardHeader className="space-y-3">
+              <div className="flex items-center gap-2 text-actionRed">
+                <Landmark className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em]">SePay Transfer</span>
+              </div>
+              <CardTitle className="font-serif text-3xl font-black">
+                Bank transfer ready for subscription #{sepayCheckout.subscriptionId}
+              </CardTitle>
+              <CardDescription className="max-w-2xl text-sm">
+                Scan the QR code below or transfer manually using the exact amount and transfer content. The account will upgrade automatically after the SePay webhook confirms the payment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+              <div className="rounded-3xl border bg-muted/30 p-4">
+                <img
+                  src={sepayCheckout.payment.qrCode}
+                  alt="SePay VietQR checkout"
+                  className="mx-auto w-full max-w-[240px] rounded-2xl border bg-white p-3 shadow-sm"
+                />
+                <p className="mt-3 text-center text-sm text-muted-foreground">
+                  Scan with a Vietnamese banking app or VietQR-compatible wallet.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border bg-muted/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Bank</p>
+                    <p className="mt-2 font-semibold">{sepayCheckout.payment.bankName}</p>
+                  </div>
+                  <div className="rounded-2xl border bg-muted/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount</p>
+                    <p className="mt-2 font-semibold">{formatVnd(sepayCheckout.payment.amount)}</p>
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Account Holder</p>
+                  <p className="mt-2 font-semibold">{sepayCheckout.payment.accountName}</p>
+                </div>
+                <div className="rounded-2xl border bg-muted/20 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Account Number</p>
+                      <p className="mt-2 font-semibold">{sepayCheckout.payment.accountNumber}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void copyToClipboard(sepayCheckout.payment.accountNumber, "Account number")}
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/20 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Transfer Content</p>
+                      <p className="mt-2 font-semibold">{sepayCheckout.payment.content}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void copyToClipboard(sepayCheckout.payment.content, "Transfer content")}
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Instructions</p>
+                  <ul className="mt-3 space-y-2 text-sm text-foreground/90">
+                    {sepayCheckout.payment.instructions.map((instruction) => (
+                      <li key={instruction} className="flex items-start gap-3">
+                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-actionRed" />
+                        <span>{instruction}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className={`rounded-2xl border px-4 py-3 text-sm ${canAccessPremium ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-amber-300 bg-amber-50 text-amber-900"}`}>
+                  {canAccessPremium
+                    ? "Payment confirmed. Premium access is now active on this account."
+                    : "Waiting for SePay webhook confirmation. Keep this page open or refresh your account status in a moment."}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-3">
           {hasPlanLoadError ? (
@@ -226,12 +438,18 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
                       ? "Already Premium"
                       : plan.price <= 0
                         ? isAuthenticated ? "Continue Reading" : "Create Account"
-                        : "Upgrade Now"}
+                        : selectedProvider === "stripe"
+                          ? "Pay with Stripe"
+                          : "Pay with SePay"}
                   </Button>
 
                   {!isAuthenticated && plan.price > 0 ? (
                     <p className="text-center text-xs text-muted-foreground">
                       You&apos;ll be asked to sign in before checkout starts.
+                    </p>
+                  ) : selectedProvider === "sepay" && plan.price > 0 ? (
+                    <p className="text-center text-xs text-muted-foreground">
+                      SePay will generate a VietQR payment with the exact VND amount after you choose this plan.
                     </p>
                   ) : null}
                 </CardFooter>
