@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Bell, LogOut, Home } from 'lucide-react';
+import { Search, Bell, LogOut, Home, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ADMIN_TAB_LABELS, AdminTab } from './admin-tabs';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdminHeaderProps {
     selectedTab: AdminTab;
@@ -31,10 +32,28 @@ interface AdminHeaderProps {
 const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
     const navigate = useRouter();
     const { user, logout } = useAuth();
+    const { toast } = useToast();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleLogout = async () => {
-        await logout();
-        navigate.push('/login');
+        try {
+            setIsLoggingOut(true);
+            await logout();
+            toast({
+                title: 'Logged out successfully',
+                description: 'Your admin session has been closed.',
+            });
+            navigate.push('/login');
+            navigate.refresh();
+        } catch {
+            toast({
+                title: 'Logout failed',
+                description: 'We could not end the admin session right now. Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLoggingOut(false);
+        }
     };
 
     return (
@@ -101,11 +120,16 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                            onClick={handleLogout}
-                            className="text-red-600 focus:text-red-600"
+                            onClick={() => void handleLogout()}
+                            disabled={isLoggingOut}
+                            className="text-red-600 focus:text-red-600 disabled:pointer-events-none disabled:opacity-60"
                         >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
+                            {isLoggingOut ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <LogOut className="mr-2 h-4 w-4" />
+                            )}
+                            <span>{isLoggingOut ? 'Signing out...' : 'Log out'}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
