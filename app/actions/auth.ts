@@ -53,7 +53,7 @@ export async function loginAction(credentials: LoginCredentials): Promise<AuthAc
         }
 
         if (result.token && result.user) {
-            persistAuthCookie(result.token, result.expires_in);
+            await persistAuthCookie(result.token, result.expires_in);
             return { success: true, user: result.user, message: result.message };
         }
 

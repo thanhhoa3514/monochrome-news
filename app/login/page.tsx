@@ -10,7 +10,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import type { User } from '@/types/auth/auth';
 import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
+
+function resolvePostAuthDestination(user: User): string {
+    if (user.roles?.some((role) => role.slug === 'admin')) {
+        return '/admin';
+    }
+
+    if (user.roles?.some((role) => role.slug === 'editor')) {
+        return '/editor';
+    }
+
+    return '/';
+}
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -20,6 +34,7 @@ export default function LoginPage() {
     
     const router = useRouter();
     const { login } = useAuth();
+    const { toast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,15 +45,30 @@ export default function LoginPage() {
             const result = await loginAction({ email, password });
 
             if (result.success && result.user) {
-                // If loginAction sets cookie, we still update the context
                 login(result.user);
-                router.push('/');
-                router.refresh(); // Ensure header updates
+                toast({
+                    title: 'Đăng nhập thành công',
+                    description: result.message || 'Bạn đã đăng nhập vào hệ thống.',
+                });
+                router.push(resolvePostAuthDestination(result.user));
+                router.refresh();
             } else {
-                setError(result.error || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+                const message = result.error || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
+                setError(message);
+                toast({
+                    title: 'Đăng nhập thất bại',
+                    description: message,
+                    variant: 'destructive',
+                });
             }
         } catch {
-            setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');
+            const message = 'Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.';
+            setError(message);
+            toast({
+                title: 'Lỗi kết nối',
+                description: message,
+                variant: 'destructive',
+            });
         } finally {
             setIsLoading(false);
         }
