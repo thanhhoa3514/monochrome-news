@@ -74,16 +74,16 @@ const AuthLink = () => {
                 </DropdownMenu>
             ) : (
                 <div className="flex items-center gap-2">
-                    <NextLink href="/login">
-                        <Button variant="ghost" size="sm" className="font-medium">
+                    <Button asChild variant="ghost" size="sm" className="font-medium">
+                        <NextLink href="/login">
                             {t('nav.login') || 'Đăng nhập'}
-                        </Button>
-                    </NextLink>
-                    <NextLink href="/register">
-                        <Button size="sm" className="bg-actionRed hover:bg-actionRed/90 text-white font-medium shadow-sm transition-all hover:shadow-md active:scale-95">
+                        </NextLink>
+                    </Button>
+                    <Button asChild size="sm" className="bg-actionRed hover:bg-actionRed/90 text-white font-medium shadow-sm transition-all hover:shadow-md active:scale-95">
+                        <NextLink href="/register">
                             {t('nav.register') || 'Đăng ký'}
-                        </Button>
-                    </NextLink>
+                        </NextLink>
+                    </Button>
                 </div>
             )}
         </div>
