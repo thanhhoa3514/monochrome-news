@@ -32,7 +32,11 @@ export function PaymentSuccessClient({ sessionId }: PaymentSuccessClientProps) {
           return;
         }
 
-        await refreshAuth();
+        try {
+          await refreshAuth();
+        } catch {
+          // transient failures should not abort the polling loop
+        }
 
         if (isCancelled) {
           return;

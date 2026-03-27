@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Crown, Loader2 } from "lucide-react";
@@ -13,7 +13,7 @@ import { clientSubscriptionService } from "@/lib/client";
 import type { Plan } from "@/types/plan";
 
 interface PricingPageClientProps {
-  plans: Plan[];
+  plans: Plan[] | null;
   canceledPlanId?: number;
 }
 
@@ -52,10 +52,12 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
   const { toast } = useToast();
   const { isAuthenticated, canAccessPremium } = useAuth();
   const [loadingPlanId, setLoadingPlanId] = useState<number | null>(null);
+  const hasPlanLoadError = plans === null;
+  const checkoutInFlightRef = useRef(false);
 
   const normalizedPlans = useMemo(
     () =>
-      [...plans].sort((left, right) => Number(left.price) - Number(right.price)).map((plan, index) => ({
+      [...(plans ?? [])].sort((left, right) => Number(left.price) - Number(right.price)).map((plan, index) => ({
         ...plan,
         features: buildPlanFeatures(plan),
         popular: index === 1 || plan.slug === "premium",
@@ -64,6 +66,12 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
   );
 
   const handlePlanAction = async (plan: Plan) => {
+    if (checkoutInFlightRef.current) {
+      return;
+    }
+
+
+
     if (plan.price <= 0) {
       router.push(isAuthenticated ? "/" : "/register");
       return;
@@ -83,6 +91,8 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
     }
 
     try {
+      checkoutInFlightRef.current = true;
+
       setLoadingPlanId(plan.id);
       const result = await clientSubscriptionService.createCheckoutSession(plan.id);
       window.location.assign(result.checkoutUrl);
@@ -94,6 +104,8 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
         variant: "destructive",
       });
     } finally {
+      checkoutInFlightRef.current = false;
+
       setLoadingPlanId(null);
     }
   };
@@ -124,7 +136,42 @@ export function PricingPageClient({ plans, canceledPlanId }: PricingPageClientPr
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {normalizedPlans.map((plan) => {
+          {hasPlanLoadError ? (
+            <Card className="border-2 border-amber-300 bg-amber-50 lg:col-span-3">
+              <CardHeader className="space-y-3">
+                <CardTitle className="font-serif text-3xl font-black text-amber-950">
+                  Checkout is temporarily down.
+                </CardTitle>
+                <CardDescription className="max-w-2xl text-sm text-amber-900">
+                  We could not load the available subscription plans right now. Please retry in a moment, or return to the homepage while the billing catalog recovers.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex flex-wrap gap-3">
+                <Button type="button" className="bg-actionRed text-white hover:bg-actionRed/90" onClick={() => router.refresh()}>
+                  Retry Pricing
+                </Button>
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/">Back to Homepage</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ) : normalizedPlans.length === 0 ? (
+            <Card className="border-2 border-border/60 lg:col-span-3">
+              <CardHeader className="space-y-3">
+                <CardTitle className="font-serif text-3xl font-black">
+                  No plans are available right now.
+                </CardTitle>
+                <CardDescription className="max-w-2xl text-sm">
+                  The pricing catalog is currently empty. Please check back later or contact the site owner before attempting checkout.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/">Back to Homepage</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ) : normalizedPlans.map((plan) => {
             const isBusy = loadingPlanId === plan.id;
             const isCurrentPremium = canAccessPremium && plan.price > 0;
 

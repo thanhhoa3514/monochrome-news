@@ -27,7 +27,13 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
       ? Number(planParam)
       : undefined;
 
-  const plans = await serverPlanService.list("active").catch(() => [] as Plan[]);
+  let plans: Plan[] | null = null;
+
+  try {
+    plans = await serverPlanService.list("active");
+  } catch (error) {
+    console.error("PricingPage failed to load active plans:", error);
+  }
 
   return <PricingPageClient plans={plans} canceledPlanId={canceledPlanId} />;
 }
