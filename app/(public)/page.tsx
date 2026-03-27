@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { NewsGridSection } from "@/components/news/news-grid-section";
 import { EmptyState } from "@/components/news/empty-state";
 import { serverNewsService } from "@/lib/server";
@@ -91,9 +90,6 @@ export default async function HomePage() {
         />
         <section className="relative overflow-hidden py-16 md:py-24 mb-6">
           <div className="container relative z-10">
-            <div className="flex justify-end mb-6">
-              <ThemeToggle />
-            </div>
             <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-actionRed/10 text-actionRed text-[10px] font-black uppercase tracking-widest border border-actionRed/20">
                 <span className="relative flex h-2 w-2">

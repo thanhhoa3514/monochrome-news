@@ -2,6 +2,7 @@ import Link from "next/link";
 import { serverNewsService } from "@/lib/server";
 import type { ReactNode } from "react";
 import AuthLink from "./AuthLink";
+import { ThemeToggle } from "./theme-toggle";
 
 const fallbackCategories = [
   { name: "World", slug: "world" },
@@ -39,7 +40,10 @@ export async function SiteShell({ children }: { children: ReactNode }) {
               <Link href="/tag/ai" className="hover:text-actionRed transition-colors">AI</Link>
             </nav>
           </div>
-          <AuthLink />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <AuthLink />
+          </div>
         </div>
         <nav aria-label="News categories" className="border-y">
           <ul className="container flex items-center gap-5 overflow-x-auto py-3 text-sm font-medium whitespace-nowrap md:hidden">
