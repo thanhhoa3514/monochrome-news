@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Crown, Loader2, QrCode, CreditCard, Copy, Landmark } from "lucide-react";
@@ -287,10 +288,16 @@ export function PricingPageClient({
             </CardHeader>
             <CardContent className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
               <div className="rounded-3xl border bg-muted/30 p-4">
-                <img
+                <Image
                   src={sepayCheckout.payment.qrCode}
                   alt="SePay VietQR checkout"
-                  className="mx-auto w-full max-w-[240px] rounded-2xl border bg-white p-3 shadow-sm"
+                  width={240}
+                  height={240}
+                  className="mx-auto h-auto w-full max-w-[240px] rounded-2xl border bg-white p-3 shadow-sm"
+                  unoptimized={
+                    sepayCheckout.payment.qrCode.startsWith("data:") ||
+                    sepayCheckout.payment.qrCode.startsWith("blob:")
+                  }
                 />
                 <p className="mt-3 text-center text-sm text-muted-foreground">
                   Scan with a Vietnamese banking app or VietQR-compatible wallet.

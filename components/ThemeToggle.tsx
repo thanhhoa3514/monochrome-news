@@ -1,50 +1,51 @@
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export default function ThemeToggle() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+type ThemeToggleProps = {
+  className?: string;
+};
 
-  // Initialize theme based on local storage or system preference
+export function ThemeToggle({ className }: ThemeToggleProps) {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
+    setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    setIsDarkMode(!isDarkMode);
-    localStorage.setItem('theme', newTheme);
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+  if (!mounted) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className={cn("size-10 shrink-0 rounded-full border-border/60", className)}
+        disabled
+        aria-hidden
+      >
+        <span className="size-5" />
+      </Button>
+    );
+  }
+
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      onClick={toggleTheme}
-      className="rounded-full w-10 h-10"
-      aria-label="Toggle theme"
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      className={cn("size-10 shrink-0 rounded-full border-border/60", className)}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={isDark}
     >
-      {isDarkMode ? (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
-      ) : (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
-      )}
+      {isDark ? <Sun className="size-5" aria-hidden /> : <Moon className="size-5" aria-hidden />}
     </Button>
   );
 }
