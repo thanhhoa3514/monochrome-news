@@ -15,11 +15,11 @@ import type { User as AuthUser } from '@/types/auth/auth';
 import { UserPlus, Mail, Lock, User, Loader2, ArrowLeft } from 'lucide-react';
 
 function resolvePostAuthDestination(user: AuthUser): string {
-    if (user.roles?.some((role) => role.slug === 'admin')) {
+    if (user.roles?.some((role) => role.slug === 'admin' || role.name.toLowerCase() === 'admin')) {
         return '/admin';
     }
 
-    if (user.roles?.some((role) => role.slug === 'editor')) {
+    if (user.roles?.some((role) => role.slug === 'editor' || role.name.toLowerCase() === 'editor')) {
         return '/editor';
     }
 
@@ -40,7 +40,10 @@ export default function RegisterPage() {
     const { toast } = useToast();
 
     const requestedRedirect = searchParams.get('redirect');
-    const safeRedirect = requestedRedirect?.startsWith('/') ? requestedRedirect : null;
+    const safeRedirect =
+        requestedRedirect && /^\/(?!\/)/.test(requestedRedirect)
+            ? requestedRedirect
+            : null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,8 +76,7 @@ export default function RegisterPage() {
                     title: 'Tạo tài khoản thành công',
                     description: result.message || 'Tài khoản của bạn đã sẵn sàng sử dụng.',
                 });
-                router.push(safeRedirect || resolvePostAuthDestination(result.user));
-                router.refresh();
+                router.replace(safeRedirect || resolvePostAuthDestination(result.user));
             } else {
                 const message = result.error || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
                 setError(message);

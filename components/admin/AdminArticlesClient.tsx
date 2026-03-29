@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @next/next/no-img-element */
 "use client";
 
-import React, { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState, useTransition } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, Loader2, FileText, Filter, Calendar, User as UserIcon, ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,16 @@ import AdminArticleDetailModal from '@/components/modals/AdminArticleDetailModal
 import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
 import { News, Category } from '@/types/news';
 import { deleteArticleAction } from '@/actions/articles';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface AdminArticlesClientProps {
     initialArticles: News[];
     totalPages: number;
     currentPage: number;
     categories: Category[];
+    initialStatus: string;
+    initialCategory: string;
+    initialQuery: string;
 }
 
 const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
@@ -30,14 +34,20 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     totalPages,
     currentPage,
     categories,
+    initialStatus,
+    initialCategory,
+    initialQuery,
 }) => {
     const { toast } = useToast();
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState(initialQuery);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const [statusFilter, setStatusFilter] = useState(initialStatus);
+    const [categoryFilter, setCategoryFilter] = useState(initialCategory);
     const [articleToDelete, setArticleToDelete] = useState<any>(null);
     const [selectedArticle, setSelectedArticle] = useState<News | undefined>(undefined);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -45,6 +55,18 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     // Edit/Add Modal State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [articleToEdit, setArticleToEdit] = useState<News | undefined>(undefined);
+
+    useEffect(() => {
+        setSearchTerm(initialQuery);
+    }, [initialQuery]);
+
+    useEffect(() => {
+        setStatusFilter(initialStatus);
+    }, [initialStatus]);
+
+    useEffect(() => {
+        setCategoryFilter(initialCategory);
+    }, [initialCategory]);
 
     const handleViewArticle = (article: News) => {
         setSelectedArticle(article);
@@ -68,19 +90,52 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
         setCategoryFilter(val);
     };
 
-    // Client-side filtering of the server-provided articles
-    const articles = initialArticles.filter(article => {
-        const matchesSearch = !searchTerm || article.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || (() => {
-            if (!article.published_at) return statusFilter === 'draft';
-            const publishedDate = new Date(article.published_at);
-            const now = new Date();
-            if (publishedDate > now) return statusFilter === 'pending';
-            return statusFilter === 'published';
-        })();
-        const matchesCategory = categoryFilter === 'all' || article.category_id?.toString() === categoryFilter;
-        return matchesSearch && matchesStatus && matchesCategory;
-    });
+    const articles = initialArticles;
+
+    const applyFilters = useCallback((nextPage: number, nextStatus: string, nextCategory: string, nextQuery: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextPage > 1) {
+            params.set('page', nextPage.toString());
+        } else {
+            params.delete('page');
+        }
+
+        if (nextStatus !== 'all') {
+            params.set('status', nextStatus);
+        } else {
+            params.delete('status');
+        }
+
+        if (nextCategory !== 'all') {
+            params.set('category', nextCategory);
+        } else {
+            params.delete('category');
+        }
+
+        if (nextQuery.trim()) {
+            params.set('q', nextQuery.trim());
+        } else {
+            params.delete('q');
+        }
+
+        startTransition(() => {
+            router.push(`${pathname}?${params.toString()}`);
+        });
+    }, [pathname, router, searchParams, startTransition]);
+
+    useEffect(() => {
+        if (debouncedSearchTerm !== searchTerm) {
+            return;
+        }
+
+        const normalizedQuery = debouncedSearchTerm.trim();
+        if (normalizedQuery === initialQuery.trim()) {
+            return;
+        }
+
+        applyFilters(1, statusFilter, categoryFilter, normalizedQuery);
+    }, [applyFilters, categoryFilter, debouncedSearchTerm, initialQuery, searchTerm, statusFilter]);
 
     const handleDelete = () => {
         if (!articleToDelete) return;
@@ -92,6 +147,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
                     description: "Article deleted successfully",
                 });
                 setArticleToDelete(null);
+                router.refresh();
             } else {
                 toast({
                     title: "Error",
@@ -103,15 +159,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     };
 
     const handlePageChange = (page: number) => {
-        startTransition(() => {
-            const url = new URL(window.location.href);
-            if (page > 1) {
-                url.searchParams.set('page', page.toString());
-            } else {
-                url.searchParams.delete('page');
-            }
-            router.push(url.pathname + url.search);
-        });
+        applyFilters(page, statusFilter, categoryFilter, initialQuery);
     };
 
     const getStatusBadge = (article: any) => {
@@ -156,7 +204,10 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
                         />
                     </div>
 
-                    <Select value={statusFilter} onValueChange={handleStatusChange}>
+                    <Select value={statusFilter} onValueChange={(value) => {
+                        handleStatusChange(value);
+                        applyFilters(1, value, categoryFilter, searchTerm);
+                    }}>
                         <SelectTrigger className="w-full sm:w-[150px] bg-background">
                             <div className="flex items-center gap-2">
                                 <Filter className="w-4 h-4 text-muted-foreground" />
@@ -171,7 +222,10 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
                         </SelectContent>
                     </Select>
 
-                    <Select value={categoryFilter} onValueChange={handleCategoryChange}>
+                    <Select value={categoryFilter} onValueChange={(value) => {
+                        handleCategoryChange(value);
+                        applyFilters(1, statusFilter, value, searchTerm);
+                    }}>
                         <SelectTrigger className="w-full sm:w-[180px] bg-background">
                             <SelectValue placeholder="Category" />
                         </SelectTrigger>

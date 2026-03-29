@@ -19,9 +19,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
     switch (selectedTab) {
         case 'articles':
-            return <AdminArticles />;
+            return <AdminArticles searchParams={searchParams ?? {}} />;
         case 'users':
-            return <AdminUsers />;
+            return <AdminUsers searchParams={searchParams ?? {}} />;
         case 'subscriptions':
             return <AdminSubscriptions searchParams={searchParams ?? {}} />;
         case 'permissions':
@@ -29,7 +29,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         case 'ai-articles':
             return <AdminAIArticles />;
         case 'tags':
-            return <AdminTags />;
+            return <AdminTags searchParams={searchParams ?? {}} />;
         case 'dashboard':
         default:
             return <AdminDashboard />;
