@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { clientPreferenceService } from "@/lib/client";
 import type { DigestPreferences, UpdateDigestPreferencesInput } from "@/types/engagement";
 
@@ -14,6 +14,7 @@ interface UseDigestPreferencesOptions {
 }
 
 export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
+  const saveInFlightRef = useRef(false);
   const [preferences, setPreferences] = useState<DigestPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(enabled);
   const [isSaving, setIsSaving] = useState(false);
@@ -22,6 +23,7 @@ export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
   const refresh = useCallback(async () => {
     if (!enabled) {
       setPreferences(defaultPreferences);
+      setError(null);
       setIsLoading(false);
       return;
     }
@@ -48,6 +50,10 @@ export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
 
   const save = useCallback(
     async (next?: UpdateDigestPreferencesInput) => {
+      if (saveInFlightRef.current) {
+        return preferences;
+      }
+
       if (!enabled) {
         return preferences;
       }
@@ -55,6 +61,7 @@ export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
       const payload = next ?? preferences;
 
       try {
+        saveInFlightRef.current = true;
         setIsSaving(true);
         setError(null);
         const response = await clientPreferenceService.updateDigestPreferences(payload);
@@ -64,6 +71,7 @@ export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
         setError(caughtError instanceof Error ? caughtError.message : "Unable to save digest preferences.");
         throw caughtError;
       } finally {
+        saveInFlightRef.current = false;
         setIsSaving(false);
       }
     },

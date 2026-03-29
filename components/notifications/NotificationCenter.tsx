@@ -13,6 +13,25 @@ import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { SITE_URL } from "@/config/environment";
+
+function isAllowedCtaUrl(input?: string | null): input is string {
+  if (!input) {
+    return false;
+  }
+
+  if (input.startsWith("/")) {
+    return !input.startsWith("//");
+  }
+
+  try {
+    const parsed = new URL(input);
+    const siteOrigin = new URL(SITE_URL).origin;
+    return (parsed.protocol === "http:" || parsed.protocol === "https:") && parsed.origin === siteOrigin;
+  } catch {
+    return false;
+  }
+}
 
 function formatRelativeTime(input: string) {
   const timestamp = new Date(input).getTime();
@@ -164,6 +183,7 @@ export function NotificationCenter({
               notifications.map((notification) => {
                 const isRead = Boolean(notification.read_at);
                 const timestamp = formatRelativeTime(notification.created_at);
+                const safeCtaUrl = isAllowedCtaUrl(notification.cta_url) ? notification.cta_url : null;
 
                 return (
                   <div
@@ -201,9 +221,9 @@ export function NotificationCenter({
 
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs text-muted-foreground">{timestamp}</p>
-                      {notification.cta_url ? (
+                      {safeCtaUrl ? (
                         <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
-                          <NextLink href={notification.cta_url}>
+                          <NextLink href={safeCtaUrl}>
                             Open
                             <ExternalLink className="h-3.5 w-3.5" />
                           </NextLink>

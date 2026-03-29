@@ -97,7 +97,7 @@ export function ReaderSettingsPage() {
     isLoading: isDigestLoading,
     refresh: refreshDigestPreview,
   } = useDigestPreview({
-    enabled: isAuthenticated && preferences.email_enabled,
+    enabled: isAuthenticated && !isPreferencesLoading && preferences.email_enabled,
     frequency: preferences.digest_frequency,
   });
   const {
@@ -270,7 +270,7 @@ export function ReaderSettingsPage() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Building your preview...
                 </div>
-              ) : digestPreview?.frequency === "off" ? (
+              ) : !preferences.email_enabled || preferences.digest_frequency === "off" ? (
                 <div className="rounded-lg border border-dashed px-4 py-8 text-center">
                   <p className="font-semibold">Digest preview is paused</p>
                   <p className="mt-2 text-sm text-muted-foreground">
@@ -328,20 +328,32 @@ export function ReaderSettingsPage() {
                   <TabsTrigger value="tags">Tags</TabsTrigger>
                 </TabsList>
                 <TabsContent value="categories" className="space-y-4">
-                  <FollowedTopicList
-                    type="category"
-                    items={follows.categories}
-                    isMutating={isMutating}
-                    onUnfollow={handleUnfollow}
-                  />
+                  {isFollowsLoading ? (
+                    <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                      Loading followed categories...
+                    </div>
+                  ) : (
+                    <FollowedTopicList
+                      type="category"
+                      items={follows.categories}
+                      isMutating={isMutating}
+                      onUnfollow={handleUnfollow}
+                    />
+                  )}
                 </TabsContent>
                 <TabsContent value="tags" className="space-y-4">
-                  <FollowedTopicList
-                    type="tag"
-                    items={follows.tags}
-                    isMutating={isMutating}
-                    onUnfollow={handleUnfollow}
-                  />
+                  {isFollowsLoading ? (
+                    <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                      Loading followed tags...
+                    </div>
+                  ) : (
+                    <FollowedTopicList
+                      type="tag"
+                      items={follows.tags}
+                      isMutating={isMutating}
+                      onUnfollow={handleUnfollow}
+                    />
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

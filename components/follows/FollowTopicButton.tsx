@@ -47,7 +47,7 @@ export function FollowTopicButton({
     }, [initialIsFollowing]);
 
     useEffect(() => {
-        if (!resolvedType || !resolvedTopicId) {
+        if (!resolvedType || resolvedTopicId == null) {
             return;
         }
 
@@ -89,7 +89,11 @@ export function FollowTopicButton({
     }, [isFollowing, resolvedType]);
 
     const handleClick = async () => {
-        if (!resolvedType || !resolvedTopicId) {
+        if (isPending) {
+            return;
+        }
+
+        if (!resolvedType || resolvedTopicId == null) {
             return;
         }
 
@@ -98,9 +102,9 @@ export function FollowTopicButton({
             return;
         }
 
-        try {
-            setIsPending(true);
+        setIsPending(true);
 
+        try {
             if (resolvedType === "category") {
                 if (isFollowing) {
                     await clientFollowService.unfollowCategory(resolvedTopicId);
@@ -137,7 +141,7 @@ export function FollowTopicButton({
             variant={isFollowing ? "secondary" : "outline"}
             className={cn("min-w-[150px] justify-center", className)}
             onClick={() => void handleClick()}
-            disabled={isPending || !resolvedType || !resolvedTopicId}
+            disabled={isPending || !resolvedType || resolvedTopicId == null}
         >
             {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
