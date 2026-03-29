@@ -38,7 +38,10 @@ export default function LoginPage() {
     const { toast } = useToast();
 
     const requestedRedirect = searchParams.get('redirect');
-    const safeRedirect = requestedRedirect?.startsWith('/') ? requestedRedirect : null;
+    const safeRedirect =
+        requestedRedirect && /^\/(?!\/)/.test(requestedRedirect)
+            ? requestedRedirect
+            : null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

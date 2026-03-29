@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @next/next/no-img-element */
 "use client";
 
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, Loader2, FileText, Filter, Calendar, User as UserIcon, ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import AdminArticleDetailModal from '@/components/modals/AdminArticleDetailModal
 import AddEditArticleModal from '@/components/modals/AddEditArticleModal';
 import { News, Category } from '@/types/news';
 import { deleteArticleAction } from '@/actions/articles';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface AdminArticlesClientProps {
     initialArticles: News[];
@@ -44,6 +45,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     const [isPending, startTransition] = useTransition();
 
     const [searchTerm, setSearchTerm] = useState(initialQuery);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [statusFilter, setStatusFilter] = useState(initialStatus);
     const [categoryFilter, setCategoryFilter] = useState(initialCategory);
     const [articleToDelete, setArticleToDelete] = useState<any>(null);
@@ -90,7 +92,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
 
     const articles = initialArticles;
 
-    const applyFilters = (nextPage: number, nextStatus: string, nextCategory: string, nextQuery: string) => {
+    const applyFilters = useCallback((nextPage: number, nextStatus: string, nextCategory: string, nextQuery: string) => {
         const params = new URLSearchParams(searchParams.toString());
 
         if (nextPage > 1) {
@@ -120,7 +122,15 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
         startTransition(() => {
             router.push(`${pathname}?${params.toString()}`);
         });
-    };
+    }, [pathname, router, searchParams, startTransition]);
+
+    useEffect(() => {
+        if (debouncedSearchTerm === initialQuery) {
+            return;
+        }
+
+        applyFilters(1, statusFilter, categoryFilter, debouncedSearchTerm);
+    }, [applyFilters, categoryFilter, debouncedSearchTerm, initialQuery, statusFilter]);
 
     const handleDelete = () => {
         if (!articleToDelete) return;
@@ -184,10 +194,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
                         <Input
                             placeholder="Search title..."
                             value={searchTerm}
-                            onChange={(e) => {
-                                handleSearchChange(e);
-                                applyFilters(1, statusFilter, categoryFilter, e.target.value);
-                            }}
+                            onChange={handleSearchChange}
                             className="pl-8 bg-background"
                         />
                     </div>
