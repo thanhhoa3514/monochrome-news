@@ -1,5 +1,5 @@
 "use client";
-import { Shield, FileEdit, LogOut, Crown, Loader2 } from 'lucide-react';
+import { Shield, FileEdit, LogOut, Crown, Loader2, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '@/lib/language-context';
 import { useToast } from '@/hooks/use-toast';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const AuthLink = () => {
     const { user, isAuthenticated, canAccessPremium, logout } = useAuth();
@@ -62,6 +63,8 @@ const AuthLink = () => {
                         </Button>
                     )}
 
+                    <NotificationCenter triggerClassName="border border-border/40" />
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 overflow-hidden border border-border/40 hover:border-border transition-colors">
@@ -94,6 +97,13 @@ const AuthLink = () => {
                                     <DropdownMenuSeparator />
                                 </>
                             )}
+                            <DropdownMenuItem asChild>
+                                <NextLink href="/settings" className="cursor-pointer flex items-center">
+                                    <Settings className="mr-2 h-4 w-4" />
+                                    <span>{t('nav.settings') || 'Cài đặt'}</span>
+                                </NextLink>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             {user.roles?.some(r => r.slug === 'admin') && (
                                 <DropdownMenuItem asChild>
                                     <NextLink href="/admin" className="cursor-pointer flex items-center">

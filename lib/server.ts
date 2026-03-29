@@ -14,6 +14,8 @@ import { createUserApi } from "@/lib/api/users";
 import { createPermissionApi } from "@/lib/api/permissions";
 import { createPlanApi } from "@/lib/api/plans";
 import { createSubscriptionApi } from "@/lib/api/subscriptions";
+import { createFollowApi } from "@/lib/api/follows";
+import { createNotificationApi } from "@/lib/api/notifications";
 import type { AuthenticatedUserResponse, User } from "@/types/auth/auth";
 
 // ─── Public News ─────────────────────────────────────
@@ -33,6 +35,8 @@ export const serverPermissionService = createPermissionApi(authenticatedServerAp
 // ─── Plans & Subscriptions ──────────────────────────
 export const serverPlanService = createPlanApi(publicServerApiClient);
 export const authenticatedServerSubscriptionService = createSubscriptionApi(authenticatedServerApiClient);
+export const authenticatedServerFollowService = createFollowApi(authenticatedServerApiClient);
+export const authenticatedServerNotificationService = createNotificationApi(authenticatedServerApiClient);
 
 // ─── Auth ────────────────────────────────────────────
 export const serverAuthService = {

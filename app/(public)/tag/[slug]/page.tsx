@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/news/empty-state";
+import { FollowTopicButton } from "@/components/follows/FollowTopicButton";
 import { NewsCardServer } from "@/components/news/news-card-server";
 import { serverNewsService } from "@/lib/server";
 
@@ -24,9 +25,17 @@ export default async function TagPage({
 
     return (
       <section className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
-        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 38, marginBottom: 8 }}>
-          Tag: {response.tag.name}
-        </h1>
+        <div className="mb-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 38, marginBottom: 8 }}>
+            Tag: {response.tag.name}
+          </h1>
+          <FollowTopicButton
+            itemId={response.tag.id}
+            itemName={response.tag.name}
+            type="tag"
+            className="w-fit"
+          />
+        </div>
         <p style={{ color: "#666", marginBottom: 20 }}>
           Page {response.news.current_page} of {response.news.last_page}
         </p>
