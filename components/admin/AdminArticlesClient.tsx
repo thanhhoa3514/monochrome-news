@@ -125,12 +125,17 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     }, [pathname, router, searchParams, startTransition]);
 
     useEffect(() => {
-        if (debouncedSearchTerm === initialQuery) {
+        if (debouncedSearchTerm !== searchTerm) {
             return;
         }
 
-        applyFilters(1, statusFilter, categoryFilter, debouncedSearchTerm);
-    }, [applyFilters, categoryFilter, debouncedSearchTerm, initialQuery, statusFilter]);
+        const normalizedQuery = debouncedSearchTerm.trim();
+        if (normalizedQuery === initialQuery.trim()) {
+            return;
+        }
+
+        applyFilters(1, statusFilter, categoryFilter, normalizedQuery);
+    }, [applyFilters, categoryFilter, debouncedSearchTerm, initialQuery, searchTerm, statusFilter]);
 
     const handleDelete = () => {
         if (!articleToDelete) return;
@@ -154,7 +159,7 @@ const AdminArticlesClient: React.FC<AdminArticlesClientProps> = ({
     };
 
     const handlePageChange = (page: number) => {
-        applyFilters(page, statusFilter, categoryFilter, searchTerm);
+        applyFilters(page, statusFilter, categoryFilter, initialQuery);
     };
 
     const getStatusBadge = (article: any) => {
