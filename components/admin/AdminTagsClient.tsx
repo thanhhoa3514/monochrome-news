@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Tag, CreateTagInput, UpdateTagInput } from '@/types/tag';
 import { createTagAction, updateTagAction, deleteTagAction } from '@/actions/tags';
 import { Button } from '@/components/ui/button';
@@ -15,13 +15,18 @@ import { useToast } from '@/hooks/use-toast';
 import AddEditTagModal from '@/components/modals/AddEditTagModal';
 import DeleteModal from '@/components/modals/DeleteModal';
 import { useDebounce } from '@/hooks/use-debounce';
+import PaginationControl from '@/components/common/PaginationControl';
 
 interface AdminTagsClientProps {
     initialTags: Tag[];
+    currentPage: number;
+    totalPages: number;
 }
 
-const AdminTagsClient = ({ initialTags }: AdminTagsClientProps) => {
+const AdminTagsClient = ({ initialTags, currentPage, totalPages }: AdminTagsClientProps) => {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
     const [tags, setTags] = useState<Tag[]>(initialTags);
     const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +37,10 @@ const AdminTagsClient = ({ initialTags }: AdminTagsClientProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedTag, setSelectedTag] = useState<Tag | undefined>(undefined);
     const [isFirstRender, setIsFirstRender] = useState(true);
+
+    useEffect(() => {
+        setTags(initialTags);
+    }, [initialTags]);
 
     // Filter tags client-side based on search
     const filteredTags = tags.filter(tag =>
@@ -135,14 +144,14 @@ const AdminTagsClient = ({ initialTags }: AdminTagsClientProps) => {
                                         <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                                     </TableCell>
                                 </TableRow>
-                            ) : tags.length === 0 ? (
+                            ) : filteredTags.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                         No tags found. Create one to get started.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                tags.map((tag) => (
+                                filteredTags.map((tag) => (
                                     <TableRow key={tag.id}>
                                         <TableCell className="font-medium">
                                             {tag.name}
@@ -186,6 +195,22 @@ const AdminTagsClient = ({ initialTags }: AdminTagsClientProps) => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <PaginationControl
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => {
+                    startTransition(() => {
+                        const params = new URLSearchParams(searchParams.toString());
+                        if (page > 1) {
+                            params.set('page', page.toString());
+                        } else {
+                            params.delete('page');
+                        }
+                        router.push(`${pathname}?${params.toString()}`);
+                    });
+                }}
+            />
 
             <AddEditTagModal
                 isOpen={isAddEditModalOpen}

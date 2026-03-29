@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, useTransition } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Search, Filter, UserRoundPlus, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,18 +17,30 @@ import DeleteModal from '@/components/modals/DeleteModal';
 import AddEditUserModal from '@/components/modals/AddEditUserModal';
 import { Role } from '@/types/permissions';
 import { deleteUserAction } from '@/actions/users';
+import PaginationControl from '@/components/common/PaginationControl';
 
 interface AdminUsersClientProps {
     initialUsers: UserListItem[];
     initialRoles: Role[];
+    currentPage: number;
+    totalPages: number;
+    initialRole: string;
 }
 
-const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps) => {
+const AdminUsersClient = ({
+    initialUsers,
+    initialRoles,
+    currentPage,
+    totalPages,
+    initialRole,
+}: AdminUsersClientProps) => {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
-    const [users] = useState<UserListItem[]>(initialUsers);
+    const [users, setUsers] = useState<UserListItem[]>(initialUsers);
     const [userSearch, setUserSearch] = useState('');
-    const [roleFilter, setRoleFilter] = useState<string>('all');
+    const [roleFilter, setRoleFilter] = useState<string>(initialRole);
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -40,25 +52,57 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
     const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState<UserListItem | undefined>(undefined);
 
+    useEffect(() => {
+        setUsers(initialUsers);
+    }, [initialUsers]);
+
+    useEffect(() => {
+        setRoleFilter(initialRole);
+    }, [initialRole]);
+
     const refreshUsers = () => {
         startTransition(() => {
             router.refresh();
         });
     };
 
+    const updateQuery = (nextRole: string, nextPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextRole !== 'all') {
+            params.set('role', nextRole);
+        } else {
+            params.delete('role');
+        }
+
+        if (nextPage > 1) {
+            params.set('page', nextPage.toString());
+        } else {
+            params.delete('page');
+        }
+
+        startTransition(() => {
+            router.push(`${pathname}?${params.toString()}`);
+        });
+    };
+
+    const handleRoleChange = (nextRole: string) => {
+        setRoleFilter(nextRole);
+        updateQuery(nextRole, 1);
+    };
+
+    const handlePageChange = (page: number) => {
+        updateQuery(roleFilter, page);
+    };
+
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
             user.email.toLowerCase().includes(userSearch.toLowerCase());
 
-        // Filter out admins and editors as requested
-        const isSubscriber = !user.roles.some(r => r.slug === 'admin' || r.slug === 'editor');
-
-        // Note: Backend roles structure is array of objects, simple filter might need adjustment
-        const matchesRole = roleFilter === 'all' || user.roles.some(r => r.slug === roleFilter);
         // Note: Backend user might not have status field yet, assuming active for now or check field
         const matchesStatus = statusFilter === 'all'; // || user.status === statusFilter;
 
-        return matchesSearch && matchesRole && matchesStatus && isSubscriber;
+        return matchesSearch && matchesStatus;
     });
 
     const handleAddUser = () => {
@@ -79,13 +123,22 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
     const confirmDeleteUser = async () => {
         if (!userToDelete) return;
 
+        const deletingUser = userToDelete;
+
         startTransition(async () => {
-            const result = await deleteUserAction(userToDelete.id);
+            const result = await deleteUserAction(deletingUser.id);
             if (result.success) {
+                const nextUsers = users.filter((user) => user.id !== deletingUser.id);
+                setUsers(nextUsers);
                 toast({
                     title: "User Deleted",
-                    description: `User "${userToDelete.name}" has been deleted successfully`,
+                    description: `User "${deletingUser.name}" has been deleted successfully`,
                 });
+                if (nextUsers.length === 0 && currentPage > 1) {
+                    updateQuery(roleFilter, currentPage - 1);
+                } else {
+                    router.refresh();
+                }
             } else {
                 toast({
                     title: "Error",
@@ -118,10 +171,6 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
         );
     };
 
-    if (users.length === 0) {
-        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
-    }
-
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -149,10 +198,14 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
                                     id="role-filter"
                                     className="w-full border rounded p-2 bg-background"
                                     value={roleFilter}
-                                    onChange={(e) => setRoleFilter(e.target.value)}
+                                    onChange={(e) => handleRoleChange(e.target.value)}
                                 >
                                     <option value="all">All Roles</option>
-                                    <option value="viewer">Viewer</option>
+                                    {initialRoles.map((role) => (
+                                        <option key={role.id} value={role.slug}>
+                                            {role.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </CollapsibleContent>
@@ -175,32 +228,56 @@ const AdminUsersClient = ({ initialUsers, initialRoles }: AdminUsersClientProps)
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredUsers.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell className="font-medium">{user.name}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>{getRoleBadge(user.roles)}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="text-destructive hover:bg-destructive/10"
-                                                onClick={() => handleDeleteClick(user)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
+                            {isPending && users.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center py-8">
+                                        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : filteredUsers.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                                        No users found for the current filters.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredUsers.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell className="font-medium">{user.name}</TableCell>
+                                        <TableCell>{user.email}</TableCell>
+                                        <TableCell>{getRoleBadge(user.roles)}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-destructive hover:bg-destructive/10"
+                                                    onClick={() => handleDeleteClick(user)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
+
+            <PaginationControl
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
+
+            <div className="text-center text-xs text-muted-foreground">
+                Showing {filteredUsers.length} results on page {currentPage} of {totalPages}
+            </div>
 
             <DeleteModal
                 isOpen={isDeleteModalOpen}
