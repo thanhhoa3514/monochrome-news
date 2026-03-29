@@ -89,12 +89,15 @@ export function ReaderSettingsPage() {
     preferences,
     isLoading: isPreferencesLoading,
     isSaving,
+    error: preferencesError,
+    refresh: refreshPreferences,
     updateLocal,
     save,
   } = useDigestPreferences({ enabled: isAuthenticated });
   const {
     preview: digestPreview,
     isLoading: isDigestLoading,
+    error: digestPreviewError,
     refresh: refreshDigestPreview,
   } = useDigestPreview({
     enabled: isAuthenticated && !isPreferencesLoading && preferences.email_enabled,
@@ -104,6 +107,8 @@ export function ReaderSettingsPage() {
     follows,
     isLoading: isFollowsLoading,
     isMutating,
+    error: followsError,
+    refresh: refreshFollows,
     unfollow,
   } = useFollowedTopics({ enabled: isAuthenticated });
 
@@ -164,6 +169,7 @@ export function ReaderSettingsPage() {
   }
 
   const isLoading = isPreferencesLoading || isFollowsLoading;
+  const isSaveDisabled = isLoading || isSaving || Boolean(preferencesError);
 
   return (
     <section className="container py-12">
@@ -204,7 +210,7 @@ export function ReaderSettingsPage() {
                   id="email-enabled"
                   checked={preferences.email_enabled}
                   onCheckedChange={(checked) => updateLocal({ email_enabled: checked })}
-                  disabled={isLoading || isSaving}
+                  disabled={isSaveDisabled}
                 />
               </div>
 
@@ -215,7 +221,7 @@ export function ReaderSettingsPage() {
                   onValueChange={(value) =>
                     updateLocal({ digest_frequency: value as "off" | "daily" | "weekly" })
                   }
-                  disabled={isLoading || isSaving || !preferences.email_enabled}
+                  disabled={isSaveDisabled || !preferences.email_enabled}
                 >
                   <SelectTrigger id="digest-frequency">
                     <SelectValue placeholder="Choose a digest schedule" />
@@ -243,11 +249,25 @@ export function ReaderSettingsPage() {
                 </Badge>
               </div>
 
+              {preferencesError ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  Could not load your current preferences. Retry before saving to avoid overwriting existing settings.
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="ml-2 h-auto p-0 align-baseline text-destructive"
+                    onClick={() => void refreshPreferences()}
+                  >
+                    Retry
+                  </Button>
+                </div>
+              ) : null}
+
               <div className="flex justify-end">
                 <Button
                   type="button"
                   onClick={() => void handleSave()}
-                  disabled={isLoading || isSaving}
+                  disabled={isSaveDisabled}
                   className="bg-actionRed text-white hover:bg-actionRed/90"
                 >
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -265,7 +285,19 @@ export function ReaderSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isDigestLoading ? (
+              {digestPreviewError ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-8 text-center text-sm text-destructive">
+                  <p className="font-semibold">Unable to load digest preview right now.</p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="mt-2 h-auto p-0 text-destructive"
+                    onClick={() => void refreshDigestPreview()}
+                  >
+                    Retry preview
+                  </Button>
+                </div>
+              ) : isDigestLoading ? (
                 <div className="flex items-center justify-center rounded-lg border border-dashed px-4 py-10 text-sm text-muted-foreground">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Building your preview...
@@ -328,7 +360,19 @@ export function ReaderSettingsPage() {
                   <TabsTrigger value="tags">Tags</TabsTrigger>
                 </TabsList>
                 <TabsContent value="categories" className="space-y-4">
-                  {isFollowsLoading ? (
+                  {followsError ? (
+                    <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">
+                      <p className="font-semibold">Unable to load followed categories.</p>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="mt-2 h-auto p-0 text-destructive"
+                        onClick={() => void refreshFollows()}
+                      >
+                        Retry follows
+                      </Button>
+                    </div>
+                  ) : isFollowsLoading ? (
                     <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
                       Loading followed categories...
                     </div>
@@ -342,7 +386,19 @@ export function ReaderSettingsPage() {
                   )}
                 </TabsContent>
                 <TabsContent value="tags" className="space-y-4">
-                  {isFollowsLoading ? (
+                  {followsError ? (
+                    <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">
+                      <p className="font-semibold">Unable to load followed tags.</p>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="mt-2 h-auto p-0 text-destructive"
+                        onClick={() => void refreshFollows()}
+                      >
+                        Retry follows
+                      </Button>
+                    </div>
+                  ) : isFollowsLoading ? (
                     <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
                       Loading followed tags...
                     </div>

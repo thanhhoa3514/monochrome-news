@@ -15,12 +15,15 @@ interface UseDigestPreferencesOptions {
 
 export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
   const saveInFlightRef = useRef(false);
+  const refreshRequestIdRef = useRef(0);
   const [preferences, setPreferences] = useState<DigestPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(enabled);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
+    const requestId = ++refreshRequestIdRef.current;
+
     if (!enabled) {
       setPreferences(defaultPreferences);
       setError(null);
@@ -32,11 +35,22 @@ export function useDigestPreferences({ enabled }: UseDigestPreferencesOptions) {
       setIsLoading(true);
       setError(null);
       const response = await clientPreferenceService.getDigestPreferences();
+
+      if (refreshRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setPreferences(response);
     } catch (caughtError) {
+      if (refreshRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setError(caughtError instanceof Error ? caughtError.message : "Unable to load digest preferences.");
     } finally {
-      setIsLoading(false);
+      if (refreshRequestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
     }
   }, [enabled]);
 
