@@ -15,11 +15,11 @@ import type { User } from '@/types/auth/auth';
 import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
 
 function resolvePostAuthDestination(user: User): string {
-    if (user.roles?.some((role) => role.slug === 'admin')) {
+    if (user.roles?.some((role) => role.slug === 'admin' || role.name.toLowerCase() === 'admin')) {
         return '/admin';
     }
 
-    if (user.roles?.some((role) => role.slug === 'editor')) {
+    if (user.roles?.some((role) => role.slug === 'editor' || role.name.toLowerCase() === 'editor')) {
         return '/editor';
     }
 
@@ -54,8 +54,7 @@ export default function LoginPage() {
                     title: 'Đăng nhập thành công',
                     description: result.message || 'Bạn đã đăng nhập vào hệ thống.',
                 });
-                router.push(safeRedirect || resolvePostAuthDestination(result.user));
-                router.refresh();
+                router.replace(safeRedirect || resolvePostAuthDestination(result.user));
             } else {
                 const message = result.error || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
                 setError(message);

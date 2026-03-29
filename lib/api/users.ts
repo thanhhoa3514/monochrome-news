@@ -3,8 +3,17 @@ import { UserListItem, PaginatedUserResponse, CreateUserInput, UpdateUserInput }
 
 export function createUserApi(client: ApiClient) {
     return {
-        getUsers: (page: number = 1, perPage: number = 10) =>
-            client.request<PaginatedUserResponse>(`/users?page=${page}&per_page=${perPage}`),
+        getUsers: (page: number = 1, perPage: number = 10, role?: string) => {
+            const params = new URLSearchParams();
+            params.set("page", String(page));
+            params.set("per_page", String(perPage));
+
+            if (role) {
+                params.set("role", role);
+            }
+
+            return client.request<PaginatedUserResponse>(`/users?${params.toString()}`);
+        },
 
         getUserById: (id: number) =>
             client.request<UserListItem>(`/users/${id}`),
