@@ -28,7 +28,8 @@ export const calculateReadTime = (
 ): string => {
     const text = stripHtml(content);
     const words = text.split(/\s+/).filter(word => word.length > 0).length;
-    const minutes = Math.max(1, Math.ceil(words / 200)); // Average reading speed
+    // Average adult reading speed is ~200-250 words per minute (based on common UX research)
+    const minutes = Math.max(1, Math.ceil(words / 200));
     return `${minutes} ${t('read.minutes') || 'phút'}`;
 };
 
