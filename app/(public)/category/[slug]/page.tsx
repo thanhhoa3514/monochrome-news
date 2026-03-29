@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/news/empty-state";
 import { NewsCardServer } from "@/components/news/news-card-server";
+import { FollowTopicButton } from "@/components/follows/FollowTopicButton";
 import { serverNewsService } from "@/lib/server";
 import { SITE_URL } from "@/config/environment";
 
@@ -12,6 +13,12 @@ function parsePage(input?: string): number {
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
 }
 
+interface ResolvedCategory {
+  id?: number;
+  name: string;
+  slug: string;
+}
+
 function formatCategoryName(slug: string): string {
   return slug
     .split("-")
@@ -20,14 +27,28 @@ function formatCategoryName(slug: string): string {
     .join(" ");
 }
 
-async function resolveCategoryName(slug: string): Promise<string> {
+async function resolveCategory(slug: string): Promise<ResolvedCategory> {
   try {
     const categories = await serverNewsService.getCategories();
     const match = categories.find((category) => category.slug === slug);
-    return match?.name ?? formatCategoryName(slug);
+    if (match) {
+      return {
+        id: match.id,
+        name: match.name,
+        slug: match.slug,
+      };
+    }
   } catch {
-    return formatCategoryName(slug);
+    return {
+      name: formatCategoryName(slug),
+      slug,
+    };
   }
+
+  return {
+    name: formatCategoryName(slug),
+    slug,
+  };
 }
 
 export async function generateMetadata({
@@ -35,7 +56,8 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const categoryName = await resolveCategoryName(params.slug);
+  const category = await resolveCategory(params.slug);
+  const categoryName = category.name;
   const title = `${categoryName} News`;
   const description = `Latest ${categoryName.toLowerCase()} updates, headlines, and analysis from Monochrome News Flash.`;
   const canonicalPath = `/category/${params.slug}`;
@@ -68,7 +90,8 @@ export default async function CategoryPage({
   searchParams?: { page?: string };
 }) {
   const page = parsePage(searchParams?.page);
-  const categoryName = await resolveCategoryName(params.slug);
+  const category = await resolveCategory(params.slug);
+  const categoryName = category.name;
 
   try {
     const response = await serverNewsService.getNewsByCategorySlug(params.slug, page);
@@ -98,13 +121,23 @@ export default async function CategoryPage({
         />
 
         <header className="mb-12">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-actionRed mb-4 transition-all">
+          <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-actionRed transition-all">
             <span className="h-px w-8 bg-actionRed" />
             Category
           </div>
-          <h1 className="font-serif text-5xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
-            {categoryName}
-          </h1>
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <h1 className="font-serif text-5xl font-black tracking-tighter uppercase md:text-6xl">
+              {categoryName}
+            </h1>
+            {category.id ? (
+              <FollowTopicButton
+                itemId={category.id}
+                itemName={category.name}
+                type="category"
+                className="w-fit"
+              />
+            ) : null}
+          </div>
           <div className="h-1.5 w-24 bg-foreground mb-8" />
           <p className="text-muted-foreground font-medium flex items-center gap-2">
             Showing Page <span className="text-foreground font-bold">{response.current_page}</span> of <span className="text-foreground font-bold">{response.last_page}</span>
