@@ -20,10 +20,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Bell, LogOut, Home, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Search, LogOut, Home, Loader2, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ADMIN_TAB_LABELS, AdminTab } from './admin-tabs';
 import { useToast } from '@/hooks/use-toast';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 interface AdminHeaderProps {
     selectedTab: AdminTab;
@@ -94,10 +96,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
             <div className="flex items-center gap-4 flex-1 justify-end">
                 <ThemeToggle />
 
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600 border border-background"></span>
-                </Button>
+                <NotificationCenter triggerClassName="relative" />
 
                 {/* User Dropdown */}
                 <DropdownMenu>
@@ -118,6 +117,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ selectedTab }) => {
                                 </p>
                             </div>
                         </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/settings" className="flex items-center">
+                                <Settings className="mr-2 h-4 w-4" />
+                                <span>Reader settings</span>
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={() => void handleLogout()}

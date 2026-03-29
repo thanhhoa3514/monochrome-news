@@ -15,6 +15,8 @@ import { createTagApi } from "@/lib/api/tags";
 import { createPermissionApi } from "@/lib/api/permissions";
 import { createPlanApi } from "@/lib/api/plans";
 import { createSubscriptionApi } from "@/lib/api/subscriptions";
+import { createFollowApi } from "@/lib/api/follows";
+import { createNotificationApi, createPreferenceApi } from "@/lib/api/notifications";
 
 // ─── Auth ────────────────────────────────────────────
 export const clientAuthService = createAuthApi(clientApiClient);
@@ -34,3 +36,8 @@ export const clientPermissionService = createPermissionApi(clientApiClient);
 // ─── Plans & Subscriptions ──────────────────────────
 export const clientPlanService = createPlanApi(clientApiClient);
 export const clientSubscriptionService = createSubscriptionApi(clientApiClient);
+
+// ─── Reader Engagement ─────────────────────────────
+export const clientFollowService = createFollowApi(clientApiClient);
+export const clientNotificationService = createNotificationApi(clientApiClient);
+export const clientPreferenceService = createPreferenceApi(clientApiClient);
